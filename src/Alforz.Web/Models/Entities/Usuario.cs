@@ -55,6 +55,14 @@ public class Usuario
     [FirestoreProperty]
     public string SelloSeguridad { get; set; } = string.Empty;
 
+    /// <summary>Premios del camino de turnos que el Admin ya le entregó.</summary>
+    [FirestoreProperty]
+    public int PremiosEntregados { get; set; }
+
+    /// <summary>Premios por los que ya se le mandó el correo de felicitación (evita repetirlo).</summary>
+    [FirestoreProperty]
+    public int PremiosNotificados { get; set; }
+
     [FirestoreProperty]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 

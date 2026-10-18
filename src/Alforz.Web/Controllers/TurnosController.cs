@@ -102,9 +102,30 @@ public class TurnosController(ITurnoService turnos) : Controller
         {
             var turno = resultado.Turno!;
             TempData["Exito"] = $"{turno.NombreUsuario} ({FormatoTurno.DiaCorto(turno.Dia)}): " +
-                (asistio ? "marcado como que asistió." : "marcado como que no asistió.");
+                (asistio ? "marcado como que asistió." : "marcado como que no asistió.") +
+                (resultado.PremioCompletado
+                    ? " 🎁 ¡Completó su camino de premios!" +
+                      (resultado.CorreoEnviado ? " Le mandamos un correo de felicitación." : " No pudimos mandarle el correo de felicitación.")
+                    : "");
         }
 
         return RedirectToAction(nameof(Panel), new { filtro });
+    }
+
+    [HttpGet]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> Premios() => View(await turnos.ListarPremiosAsync());
+
+    [HttpPost]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> EntregarPremio(string usuarioId)
+    {
+        var resultado = await turnos.EntregarPremioAsync(usuarioId, User.Identity?.Name ?? "Admin");
+        if (resultado.Exito)
+            TempData["Exito"] = "Premio marcado como entregado. 🎁";
+        else
+            TempData["Aviso"] = resultado.Error;
+
+        return RedirectToAction(nameof(Premios));
     }
 }

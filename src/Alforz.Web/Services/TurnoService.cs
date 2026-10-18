@@ -10,6 +10,7 @@ namespace Alforz.Web.Services;
 
 public class TurnoService(
     ITurnoRepository turnos,
+    IUsuarioRepository usuarios,
     IEmailService correo,
     IOptions<TurnosSettings> opciones,
     ILogger<TurnoService> logger) : ITurnoService
@@ -107,8 +108,41 @@ public class TurnoService(
 
     public async Task<ProgresoPremio> ProgresoPremioAsync(string usuarioId)
     {
-        var asistidos = (await turnos.ListarDeUsuarioAsync(usuarioId)).Count(t => t.EstaActivo && t.Asistio == true);
-        return new ProgresoPremio(asistidos, Math.Max(1, _config.AsistenciasParaPremio));
+        var asistidos = (await turnos.ListarDeUsuarioAsync(usuarioId)).Count(CuentaParaPremio);
+        var usuario = await usuarios.ObtenerPorIdAsync(usuarioId);
+        return new ProgresoPremio(asistidos, MetaPremio, usuario?.PremiosEntregados ?? 0);
+    }
+
+    public async Task<IReadOnlyList<PremioUsuario>> ListarPremiosAsync()
+    {
+        var asistidosPorUsuario = (await turnos.ListarAsync())
+            .Where(CuentaParaPremio)
+            .GroupBy(t => t.UsuarioId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        return (await usuarios.ListarAsync())
+            .Where(u => asistidosPorUsuario.ContainsKey(u.Id))
+            .Select(u => new PremioUsuario(u, new ProgresoPremio(asistidosPorUsuario[u.Id], MetaPremio, u.PremiosEntregados)))
+            .OrderByDescending(p => p.Progreso.PorRetirar)
+            .ThenByDescending(p => p.Progreso.Asistidos)
+            .ToList();
+    }
+
+    public async Task<Resultado> EntregarPremioAsync(string usuarioId, string entregadoPor)
+    {
+        var usuario = await usuarios.ObtenerPorIdAsync(usuarioId);
+        if (usuario is null)
+            return Resultado.Falla("Ese usuario no existe.");
+
+        var progreso = await ProgresoPremioAsync(usuarioId);
+        if (progreso.PorRetirar == 0)
+            return Resultado.Falla($"{usuario.NombreUsuario} no tiene premios por retirar.");
+
+        usuario.PremiosEntregados++;
+        await usuarios.ActualizarAsync(usuario);
+        logger.LogInformation("Premio entregado a {UsuarioId} por {Admin} ({Entregados} en total)",
+            usuarioId, entregadoPor, usuario.PremiosEntregados);
+        return Resultado.Ok;
     }
 
     public async Task<IReadOnlyList<Turno>> ListarAsync(FiltroTurnos filtro)
@@ -161,8 +195,44 @@ public class TurnoService(
         turno.FechaAsistencia = DateTime.UtcNow;
         await turnos.ActualizarAsync(turno);
         logger.LogInformation("Turno {TurnoId}: asistencia {Asistio} marcada por {Admin}", turno.Id, asistio, marcadoPor);
-        return new ResultadoTurno(true, Turno: turno);
+
+        var (completado, enviado) = asistio ? await FelicitarSiCompletoAsync(turno.UsuarioId) : (false, false);
+        return new ResultadoTurno(true, Turno: turno, CorreoEnviado: enviado, PremioCompletado: completado);
     }
+
+    /// <summary>
+    /// Si el usuario tiene más premios ganados que avisados, le manda el correo de felicitación una sola vez
+    /// (aunque el Admin desmarque y vuelva a marcar la asistencia).
+    /// </summary>
+    private async Task<(bool Completado, bool Enviado)> FelicitarSiCompletoAsync(string usuarioId)
+    {
+        var usuario = await usuarios.ObtenerPorIdAsync(usuarioId);
+        if (usuario is null)
+            return (false, false);
+
+        var progreso = await ProgresoPremioAsync(usuarioId);
+        if (progreso.PremiosGanados <= usuario.PremiosNotificados)
+            return (false, false);
+
+        usuario.PremiosNotificados = progreso.PremiosGanados;
+        await usuarios.ActualizarAsync(usuario);
+        logger.LogInformation("{UsuarioId} completó el camino de premios ({Premios} en total)", usuarioId, progreso.PremiosGanados);
+
+        try
+        {
+            await correo.EnviarAsync(usuario.Correo, "¡Ganaste un premio sorpresa en Alforz! 🎁", ArmarCorreoPremio(usuario.NombreUsuario));
+            return (true, true);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "No se pudo enviar el correo de premio a {UsuarioId}", usuarioId);
+            return (true, false);
+        }
+    }
+
+    private int MetaPremio => Math.Max(1, _config.AsistenciasParaPremio);
+
+    private static bool CuentaParaPremio(Turno turno) => turno.EstaActivo && turno.Asistio == true;
 
     public bool YaPaso(Turno turno) => turno.Inicio <= Ahora;
 
@@ -209,6 +279,20 @@ public class TurnoService(
             </div>
             """;
     }
+
+    private string ArmarCorreoPremio(string nombre) => $"""
+        <div style="font-family:Segoe UI,Arial,sans-serif;color:#2F3A4A;max-width:480px;margin:auto">
+          <h2 style="background:#FFE7A3;padding:16px;border-radius:12px;margin:0 0 16px">¡Completaste tu camino de premios! 🎉</h2>
+          <p>Hola {WebUtility.HtmlEncode(nombre)},</p>
+          <p>Asististe a {MetaPremio} turnos con nosotros y llenaste todos los círculos de tu camino.</p>
+          <p style="font-size:40px;text-align:center;margin:8px 0">🎁</p>
+          <p style="background:#C8EBDD;padding:16px;border-radius:12px;text-align:center;font-weight:bold">
+            Ganaste un premio sorpresa. Te lo entregamos en tu próximo turno.
+          </p>
+          <p>¡Gracias por elegirnos! Con tu próximo turno empieza un camino nuevo hacia otro premio.</p>
+          <p style="margin-top:16px">Alforz Robotics</p>
+        </div>
+        """;
 
     private static TimeZoneInfo BuscarZona(string id)
     {

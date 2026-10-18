@@ -179,6 +179,10 @@ body { margin-bottom: 64px; }
 .alf-paso-premio-ganado circle { fill: #FFE7A3; stroke: #C99A2E; }
 .alf-paso-premio text, .alf-paso-premio-ganado text { font-size: 26px; }
 .alf-camino-premios { background: #FFE7A3; color: var(--alf-texto); font-weight: 700; padding: .5rem .8rem; }
+.alf-camino-retirar { background: var(--alf-menta); color: var(--alf-texto); font-weight: 700; padding: .4rem .7rem; white-space: normal; text-align: right; }
+.alf-progreso-premio { height: .6rem; background: color-mix(in srgb, var(--alf-lavanda) 45%, white); }
+.alf-progreso-premio .progress-bar { background: color-mix(in srgb, var(--alf-menta) 60%, var(--alf-texto)); }
+.alf-fila-premio > td { background: color-mix(in srgb, #FFE7A3 45%, white); }
 @keyframes alf-latido { 0%, 100% { transform: scale(.85); opacity: .35; } 50% { transform: scale(1.1); opacity: .7; } }
 @media (prefers-reduced-motion: reduce) { .alf-paso-siguiente .alf-paso-aura { animation: none; } }
 

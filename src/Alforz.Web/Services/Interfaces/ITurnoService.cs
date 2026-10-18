@@ -11,8 +11,12 @@ public enum EstadoHorario
 
 public record Horario(int HoraInicio, int DuracionHoras, EstadoHorario Estado);
 
-/// <summary>Resultado de reservar o cancelar. Si falla solo el correo, la operación igual queda hecha.</summary>
-public record ResultadoTurno(bool Exito, string? Error = null, Turno? Turno = null, bool CorreoEnviado = false)
+/// <summary>
+/// Resultado de reservar, cancelar o marcar asistencia. Si falla solo el correo, la operación igual queda hecha.
+/// <paramref name="PremioCompletado"/>: al marcar asistencia, el usuario acaba de completar el camino de premios.
+/// </summary>
+public record ResultadoTurno(
+    bool Exito, string? Error = null, Turno? Turno = null, bool CorreoEnviado = false, bool PremioCompletado = false)
 {
     public static ResultadoTurno Falla(string error) => new(false, error);
 }
@@ -21,9 +25,12 @@ public record ResultadoTurno(bool Exito, string? Error = null, Turno? Turno = nu
 /// Avance en el camino de premios. Al completar la meta se gana un premio y el camino
 /// vuelve a empezar; justo al completarlo se muestra lleno hasta el próximo turno asistido.
 /// </summary>
-public record ProgresoPremio(int Asistidos, int Meta)
+public record ProgresoPremio(int Asistidos, int Meta, int Entregados = 0)
 {
     public int PremiosGanados => Asistidos / Meta;
+
+    /// <summary>Premios ganados que el Admin todavía no entregó.</summary>
+    public int PorRetirar => Math.Max(0, PremiosGanados - Entregados);
 
     /// <summary>Círculos llenos en el camino actual (0..Meta).</summary>
     public int Llenos => Asistidos > 0 && Asistidos % Meta == 0 ? Meta : Asistidos % Meta;
@@ -32,6 +39,9 @@ public record ProgresoPremio(int Asistidos, int Meta)
 
     public int Faltan => Meta - Llenos;
 }
+
+/// <summary>Una fila de la página de premios del Admin.</summary>
+public record PremioUsuario(Usuario Usuario, ProgresoPremio Progreso);
 
 public enum FiltroTurnos
 {
@@ -71,6 +81,12 @@ public interface ITurnoService
 
     /// <summary>Marca si la persona asistió. Solo para turnos activos que ya empezaron; se puede corregir.</summary>
     Task<ResultadoTurno> MarcarAsistenciaAsync(string turnoId, bool asistio, string marcadoPor);
+
+    /// <summary>Usuarios con al menos un turno asistido: primero los que tienen premios por retirar.</summary>
+    Task<IReadOnlyList<PremioUsuario>> ListarPremiosAsync();
+
+    /// <summary>Registra que el Admin entregó un premio (solo si el usuario tiene alguno por retirar).</summary>
+    Task<Resultado> EntregarPremioAsync(string usuarioId, string entregadoPor);
 
     /// <summary>Si el turno ya empezó o terminó (según la hora del negocio).</summary>
     bool YaPaso(Turno turno);
