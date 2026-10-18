@@ -70,8 +70,10 @@ Seguridad:
 
 - Claves con hash PBKDF2. Los códigos se guardan hasheados, vencen a los 15 min y se aceptan hasta 5 intentos.
 - La cuenta se bloquea 15 min después de 5 claves incorrectas seguidas.
-- Cada 5 min la cookie se revisa contra Firestore: si desactivan al usuario, se le cierra la sesión, y si le cambian el rol, la cookie se actualiza.
+- Cada 5 min la cookie se revisa contra Firestore: si desactivan al usuario o cambia su clave (sello de seguridad), se le cierra la sesión, y si le cambian el rol, la cookie se actualiza.
 - Todos los POST exigen token antiforgery.
+- Límite por IP: 10 intentos cada 5 min para ingresar y validar códigos; 5 cada 15 min para lo que manda correos.
+- Las claves que firman las cookies se guardan en la colección `dataProtectionKeys`, así un deploy no cierra las sesiones.
 
 Para restringir una página por rol:
 

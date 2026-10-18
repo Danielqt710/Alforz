@@ -43,6 +43,7 @@ public static class SeedAdmin
             // Ya existe esa cuenta (por ejemplo, se registró antes): se la asciende y se le pone
             // la clave de AdminInicial, para que nadie que haya registrado ese correo quede como Admin.
             existente.ClaveHash = proveedor.GetRequiredService<PasswordHelper>().Hashear(existente, config.Clave);
+            existente.SelloSeguridad = Usuario.NuevoSello();
             existente.IntentosFallidos = 0;
             existente.BloqueadoHasta = null;
             existente.Rol = Roles.Admin;
@@ -61,6 +62,7 @@ public static class SeedAdmin
             CorreoNormalizado = Usuario.Normalizar(config.Correo),
             CorreoVerificado = true,
             Rol = Roles.Admin,
+            SelloSeguridad = Usuario.NuevoSello(),
             FechaCreacion = DateTime.UtcNow
         };
         admin.ClaveHash = proveedor.GetRequiredService<PasswordHelper>().Hashear(admin, config.Clave);

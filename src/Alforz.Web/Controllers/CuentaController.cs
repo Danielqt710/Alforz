@@ -1,3 +1,4 @@
+using Alforz.Web.Helpers;
 using Alforz.Web.Models.Entities;
 using Alforz.Web.Models.ViewModels;
 using Alforz.Web.Repositories.Interfaces;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Alforz.Web.Controllers;
 
@@ -30,6 +32,7 @@ public class CuentaController(
     }
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Intentos)]
     public async Task<IActionResult> Ingresar(IngresarViewModel modelo)
     {
         if (!ModelState.IsValid)
@@ -95,6 +98,7 @@ public class CuentaController(
     }
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Correos)]
     public async Task<IActionResult> Registrar(RegistrarViewModel modelo)
     {
         if (!ModelState.IsValid)
@@ -126,6 +130,7 @@ public class CuentaController(
         View(new VerificarCorreoViewModel { Correo = correo ?? string.Empty });
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Intentos)]
     public async Task<IActionResult> VerificarCorreo(VerificarCorreoViewModel modelo)
     {
         if (!ModelState.IsValid)
@@ -143,6 +148,7 @@ public class CuentaController(
     }
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Correos)]
     public async Task<IActionResult> ReenviarCodigo(string correo)
     {
         var usuario = string.IsNullOrWhiteSpace(correo) ? null : await usuarios.ObtenerPorCorreoAsync(correo);
@@ -160,6 +166,7 @@ public class CuentaController(
     public IActionResult OlvideClave() => View(new OlvideClaveViewModel());
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Correos)]
     public async Task<IActionResult> OlvideClave(OlvideClaveViewModel modelo)
     {
         if (!ModelState.IsValid)
@@ -184,6 +191,7 @@ public class CuentaController(
         View(new RestablecerClaveViewModel { Correo = correo ?? string.Empty });
 
     [HttpPost]
+    [EnableRateLimiting(LimitesCuenta.Intentos)]
     public async Task<IActionResult> RestablecerClave(RestablecerClaveViewModel modelo)
     {
         if (!ModelState.IsValid)

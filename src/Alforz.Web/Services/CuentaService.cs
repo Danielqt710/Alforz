@@ -22,6 +22,9 @@ public class CuentaService(
     /// <summary>Claim con la hora (ticks UTC) en que se revisó el usuario contra Firestore por última vez.</summary>
     public const string ClaimValidado = "alforz:validado";
 
+    /// <summary>Claim con el <see cref="Usuario.SelloSeguridad"/> que tenía el usuario al entrar.</summary>
+    public const string ClaimSello = "alforz:sello";
+
     private const string ErrorCodigo = "El código no es válido o ya venció. Pide uno nuevo.";
 
     private readonly SeguridadSettings _seguridad = opciones.Value;
@@ -44,6 +47,7 @@ public class CuentaService(
             Correo = correoUsuario,
             CorreoNormalizado = Usuario.Normalizar(correoUsuario),
             Rol = Roles.Visita,
+            SelloSeguridad = Usuario.NuevoSello(),
             FechaCreacion = DateTime.UtcNow
         };
         usuario.ClaveHash = claves.Hashear(usuario, clave);
@@ -171,6 +175,7 @@ public class CuentaService(
             return Resultado.Falla(ErrorCodigo);
 
         usuario.ClaveHash = claves.Hashear(usuario, nuevaClave);
+        usuario.SelloSeguridad = Usuario.NuevoSello();
         usuario.IntentosFallidos = 0;
         usuario.BloqueadoHasta = null;
         // Si recibió el código, el correo es suyo.
@@ -188,6 +193,7 @@ public class CuentaService(
             new(ClaimTypes.Name, usuario.NombreUsuario),
             new(ClaimTypes.Email, usuario.Correo),
             new(ClaimTypes.Role, usuario.Rol),
+            new(ClaimSello, usuario.SelloSeguridad),
             new(ClaimValidado, DateTime.UtcNow.Ticks.ToString())
         };
         var identidad = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

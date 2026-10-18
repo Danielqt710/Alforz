@@ -5,7 +5,12 @@ using Alforz.Web.Repositories.Interfaces;
 using Alforz.Web.Services;
 using Alforz.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +42,37 @@ builder.Services.AddSingleton<ITokenRepository, FirestoreTokenRepository>();
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<ICuentaService, CuentaService>();
 builder.Services.AddScoped<ValidadorCookie>();
+
+// Claves que firman cookies y antiforgery: en Firestore, para que no se pierdan en cada deploy.
+// Sin Firebase configurado quedan en disco, como antes.
+builder.Services.AddDataProtection().SetApplicationName("Alforz");
+builder.Services.AddOptions<KeyManagementOptions>()
+    .Configure<FirestoreProveedor, IOptions<FirebaseSettings>>((opciones, firestore, firebase) =>
+    {
+        if (firebase.Value.EstaConfigurado)
+            opciones.XmlRepository = new FirestoreXmlRepository(firestore);
+    });
+
+// Límite de pedidos por IP en las páginas de cuenta (frena fuerza bruta y abuso del cupo de correos).
+builder.Services.AddRateLimiter(opciones =>
+{
+    opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opciones.OnRejected = async (contexto, cancelacion) =>
+    {
+        contexto.HttpContext.Response.ContentType = "text/html; charset=utf-8";
+        await contexto.HttpContext.Response.WriteAsync(
+            "<p style=\"font-family:sans-serif;padding:2rem\">Demasiados intentos seguidos. " +
+            "Espera unos minutos y vuelve a probar. <a href=\"/\">Volver al inicio</a></p>", cancelacion);
+    };
+
+    opciones.AddPolicy(LimitesCuenta.Intentos, contexto => RateLimitPartition.GetFixedWindowLimiter(
+        LimitesCuenta.ClaveIp(contexto),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(5) }));
+
+    opciones.AddPolicy(LimitesCuenta.Correos, contexto => RateLimitPartition.GetFixedWindowLimiter(
+        LimitesCuenta.ClaveIp(contexto),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(15) }));
+});
 
 // Autenticación por cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -85,6 +121,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -47,6 +47,14 @@ public class Usuario
     [FirestoreProperty]
     public DateTime? BloqueadoHasta { get; set; }
 
+    /// <summary>
+    /// Cambia cada vez que cambia la clave. Va dentro de la cookie: si ya no coincide,
+    /// esa sesión se cierra (así cambiar la clave saca a quien haya entrado con la anterior).
+    /// Vacío por defecto para que los usuarios guardados antes de este campo lean siempre lo mismo.
+    /// </summary>
+    [FirestoreProperty]
+    public string SelloSeguridad { get; set; } = string.Empty;
+
     [FirestoreProperty]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
@@ -56,4 +64,6 @@ public class Usuario
     public bool EstaBloqueado(DateTime ahoraUtc) => BloqueadoHasta is { } hasta && hasta > ahoraUtc;
 
     public static string Normalizar(string valor) => valor.Trim().ToLowerInvariant();
+
+    public static string NuevoSello() => Guid.NewGuid().ToString("N");
 }
