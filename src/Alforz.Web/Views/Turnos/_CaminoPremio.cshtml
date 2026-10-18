@@ -1,0 +1,91 @@
+@using Alforz.Web.Services.Interfaces
+@model ProgresoPremio
+@functions {
+    // Posición de cada círculo en zigzag: una fila de izquierda a derecha, la siguiente al revés.
+    private static (double X, double Y) Posicion(int i, int columnas, double dx, double dy, double margen)
+    {
+        var fila = i / columnas;
+        var enFila = i % columnas;
+        var columna = fila % 2 == 0 ? enFila : columnas - 1 - enFila;
+        return (margen + columna * dx, margen + fila * dy);
+    }
+}
+@{
+    var meta = Model.Meta;
+    var descripcion = Model.Completo
+        ? $"Camino completo: {meta} de {meta} turnos asistidos. Ganaste el premio sorpresa."
+        : $"Camino de premios: {Model.Llenos} de {meta} turnos asistidos.";
+
+    // Dos dibujos del mismo camino: ancho para pantallas grandes y más alto para el teléfono.
+    var disenos = new[]
+    {
+        (Clase: "d-none d-sm-block", Columnas: 6, Dx: 100.0, Dy: 100.0, Margen: 50.0, Radio: 28.0),
+        (Clase: "d-sm-none", Columnas: 4, Dx: 82.0, Dy: 92.0, Margen: 42.0, Radio: 27.0)
+    };
+}
+
+<section class="alf-card p-4 mb-4 alf-camino" aria-labelledby="camino-titulo">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+            <h2 id="camino-titulo" class="h5 mb-1"><i class="bi bi-stars me-2"></i>Tu camino de premios</h2>
+            <p class="mb-0 text-body-secondary">
+                @if (Model.Completo)
+                {
+                    <strong class="text-body">¡Completaste el camino! 🎉</strong>
+                    @: Ganaste un premio sorpresa: te lo entregamos en tu próximo turno.
+                }
+                else if (Model.Llenos == 0)
+                {
+                    @:Cada turno al que asistas llena un círculo. Al llegar a @meta, ¡te llevas un premio sorpresa!
+                }
+                else
+                {
+                    @:Llevas <strong class="text-body">@Model.Llenos de @meta</strong>.
+                    @(Model.Faltan == 1 ? "¡Te falta solo 1 turno para el premio sorpresa!" : $"Te faltan {Model.Faltan} turnos para el premio sorpresa.")
+                }
+            </p>
+        </div>
+        @if (Model.PremiosGanados > 0)
+        {
+            <span class="badge rounded-pill alf-camino-premios"><i class="bi bi-gift me-1"></i>@Model.PremiosGanados @(Model.PremiosGanados == 1 ? "premio ganado" : "premios ganados")</span>
+        }
+    </div>
+
+    @foreach (var d in disenos)
+    {
+        var filas = (int)Math.Ceiling(meta / (double)d.Columnas);
+        var ancho = 2 * d.Margen + (Math.Min(meta, d.Columnas) - 1) * d.Dx;
+        var alto = 2 * d.Margen + (filas - 1) * d.Dy;
+
+        <svg class="alf-camino-svg @d.Clase" viewBox="0 0 @ancho @alto" role="img" aria-label="@descripcion">
+            @* Primero el sendero, para que quede detrás de los círculos. *@
+            @for (var i = 0; i < meta - 1; i++)
+            {
+                var (x1, y1) = Posicion(i, d.Columnas, d.Dx, d.Dy, d.Margen);
+                var (x2, y2) = Posicion(i + 1, d.Columnas, d.Dx, d.Dy, d.Margen);
+                <line x1="@x1" y1="@y1" x2="@x2" y2="@y2" class="@(i + 1 < Model.Llenos ? "alf-sendero-hecho" : "alf-sendero")" />
+            }
+
+            @for (var i = 0; i < meta; i++)
+            {
+                var (x, y) = Posicion(i, d.Columnas, d.Dx, d.Dy, d.Margen);
+                var lleno = i < Model.Llenos;
+                var premio = i == meta - 1;
+                var siguiente = i == Model.Llenos;
+                var clase = premio ? (lleno ? "alf-paso-premio-ganado" : "alf-paso-premio")
+                          : lleno ? "alf-paso-lleno"
+                          : siguiente ? "alf-paso-siguiente"
+                          : "alf-paso";
+
+                <g class="@clase">
+                    @if (siguiente)
+                    {
+                        <circle cx="@x" cy="@y" r="@(d.Radio + 6)" class="alf-paso-aura" />
+                    }
+                    <circle cx="@x" cy="@y" r="@d.Radio" />
+                    <text x="@x" y="@y" dy="0.36em" text-anchor="middle">@(premio ? "🎁" : lleno ? "✓" : (i + 1).ToString())</text>
+                </g>
+            }
+        </svg>
+    }
+</section>

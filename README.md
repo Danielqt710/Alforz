@@ -91,6 +91,8 @@ Para restringir una página por rol:
   cualquiera; a quien lo agendó le llega un aviso por correo. En los turnos que ya empezaron marca
   si la persona **asistió** o **no asistió** (se puede corregir).
 - Dos personas no pueden quedarse con el mismo horario: la reserva se hace en una transacción de Firestore.
+- Camino de premios: en `/Turnos` cada usuario ve 12 círculos; cada turno marcado como "Asistió" llena uno
+  y al completar los 12 gana un premio sorpresa (luego el camino vuelve a empezar).
 - Cada usuario puede tener hasta 3 turnos próximos. Todo se ajusta en la sección `Turnos` de `appsettings.json`
   (los días de atención, en `Turnos:DiasLaborables`, con 0 = domingo ... 6 = sábado).
 

@@ -67,6 +67,9 @@ public class TurnosSettings
     /// <summary>Turnos futuros que puede tener activos un mismo usuario.</summary>
     public int MaxTurnosActivosPorUsuario { get; set; } = 3;
 
+    /// <summary>Turnos asistidos que completan el camino y dan el premio sorpresa.</summary>
+    public int AsistenciasParaPremio { get; set; } = 12;
+
     /// <summary>Zona horaria del negocio (IANA), para saber qué horarios ya pasaron.</summary>
     public string ZonaHoraria { get; set; } = "America/Argentina/Buenos_Aires";
 }

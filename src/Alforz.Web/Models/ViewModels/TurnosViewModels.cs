@@ -11,6 +11,7 @@ public class AgendarTurnoViewModel
     public bool EsDiaLaborable { get; set; }
     public IReadOnlyList<Horario> Horarios { get; set; } = [];
     public IReadOnlyList<Turno> MisTurnos { get; set; } = [];
+    public ProgresoPremio Progreso { get; set; } = new(0, 12);
 
     public DateOnly? DiaAnterior => Dia > DiaMinimo ? Dia.AddDays(-1) : null;
     public DateOnly? DiaSiguiente => Dia < DiaMaximo ? Dia.AddDays(1) : null;

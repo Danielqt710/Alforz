@@ -162,6 +162,26 @@ body { margin-bottom: 64px; }
 .alf-estado-asistio   { background: var(--alf-celeste); }
 .alf-estado-falto     { background: color-mix(in srgb, #E8B4BC 70%, white); }
 
+/* ---------- Camino de premios (turnos asistidos) ---------- */
+.alf-camino-svg { width: 100%; max-width: 640px; height: auto; display: block; margin: 0 auto; overflow: visible; }
+.alf-camino-svg.d-sm-none { max-width: 340px; }
+.alf-sendero      { stroke: var(--alf-lavanda); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 2 12; }
+.alf-sendero-hecho { stroke: color-mix(in srgb, var(--alf-menta) 55%, var(--alf-texto)); stroke-width: 8; stroke-linecap: round; }
+.alf-camino-svg circle { stroke-width: 3; }
+.alf-camino-svg text { font-family: var(--bs-body-font-family); font-weight: 800; font-size: 20px; fill: var(--alf-texto); pointer-events: none; }
+.alf-paso circle          { fill: white; stroke: var(--alf-lavanda); }
+.alf-paso text            { fill: color-mix(in srgb, var(--alf-texto) 55%, white); font-size: 18px; }
+.alf-paso-lleno circle    { fill: var(--alf-menta); stroke: color-mix(in srgb, var(--alf-menta) 55%, var(--alf-texto)); }
+.alf-paso-lleno text      { font-size: 24px; }
+.alf-paso-siguiente circle { fill: white; stroke: var(--alf-celeste-fuerte); stroke-dasharray: 6 4; }
+.alf-paso-siguiente .alf-paso-aura { fill: var(--alf-celeste); stroke: none; opacity: .5; transform-box: fill-box; transform-origin: center; animation: alf-latido 1.8s ease-in-out infinite; }
+.alf-paso-premio circle   { fill: color-mix(in srgb, var(--alf-lavanda) 45%, white); stroke: var(--alf-lavanda-fuerte); stroke-dasharray: 6 4; }
+.alf-paso-premio-ganado circle { fill: #FFE7A3; stroke: #C99A2E; }
+.alf-paso-premio text, .alf-paso-premio-ganado text { font-size: 26px; }
+.alf-camino-premios { background: #FFE7A3; color: var(--alf-texto); font-weight: 700; padding: .5rem .8rem; }
+@keyframes alf-latido { 0%, 100% { transform: scale(.85); opacity: .35; } 50% { transform: scale(1.1); opacity: .7; } }
+@media (prefers-reduced-motion: reduce) { .alf-paso-siguiente .alf-paso-aura { animation: none; } }
+
 /* ---------- Footer ---------- */
 .footer {
   position: absolute; bottom: 0; width: 100%;

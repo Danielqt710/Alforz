@@ -30,7 +30,8 @@ public class TurnosController(ITurnoService turnos) : Controller
             DiaMaximo = turnos.UltimoDiaAgendable,
             EsDiaLaborable = turnos.EsDiaLaborable(dia),
             Horarios = await turnos.HorariosDelDiaAsync(dia),
-            MisTurnos = await turnos.TurnosDeUsuarioAsync(UsuarioId)
+            MisTurnos = await turnos.TurnosDeUsuarioAsync(UsuarioId),
+            Progreso = await turnos.ProgresoPremioAsync(UsuarioId)
         });
     }
 

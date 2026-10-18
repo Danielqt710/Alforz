@@ -105,6 +105,12 @@ public class TurnoService(
             .OrderBy(t => t.Inicio)
             .ToList();
 
+    public async Task<ProgresoPremio> ProgresoPremioAsync(string usuarioId)
+    {
+        var asistidos = (await turnos.ListarDeUsuarioAsync(usuarioId)).Count(t => t.EstaActivo && t.Asistio == true);
+        return new ProgresoPremio(asistidos, Math.Max(1, _config.AsistenciasParaPremio));
+    }
+
     public async Task<IReadOnlyList<Turno>> ListarAsync(FiltroTurnos filtro)
     {
         var todos = await turnos.ListarAsync();
