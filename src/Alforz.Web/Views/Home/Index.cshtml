@@ -1,43 +1,51 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Inicio";
 }
 
-<section class="alf-hero text-center mb-4">
-    <h1 class="display-5 fw-bold">Alforz</h1>
-    <p class="lead mb-4">
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            @:Hola, @User.Identity.Name.
-        }
-        else
-        {
-            <a asp-controller="Cuenta" asp-action="Ingresar">Ingresa</a> @:o <a asp-controller="Cuenta" asp-action="Registrar">crea tu cuenta</a>.
-        }
-    </p>
-    <div class="d-flex gap-2 justify-content-center flex-wrap">
-        <span class="badge rounded-pill badge-rol badge-rol-admin px-3 py-2">Admin</span>
-        <span class="badge rounded-pill badge-rol badge-rol-coordinador px-3 py-2">Coordinador</span>
-        <span class="badge rounded-pill badge-rol badge-rol-visita px-3 py-2">Visita</span>
-    </div>
-</section>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var rol = User.FindFirstValue(ClaimTypes.Role) ?? Roles.Visita;
 
-<div class="row g-3">
-    <div class="col-md-4">
-        <div class="alf-card p-4 h-100">
-            <h2 class="h5"><i class="bi bi-shield-lock me-2"></i>Admin</h2>
-            <p class="mb-0">Control total: usuarios, roles, configuración y contenido.</p>
+    @* Al entrar, el usuario ve la presentación de la compañía. *@
+    <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+        <h1 class="h3 mb-0">Hola, @User.Identity.Name</h1>
+        <span class="badge rounded-pill badge-rol badge-rol-@rol.ToLowerInvariant() px-3 py-2">@rol</span>
+    </div>
+    <partial name="_OverviewAlforz" />
+}
+else
+{
+    <section class="alf-hero text-center mb-4">
+        <h1 class="display-5 fw-bold">Alforz</h1>
+        <p class="lead mb-4">
+            <a asp-controller="Cuenta" asp-action="Ingresar">Ingresa</a> o <a asp-controller="Cuenta" asp-action="Registrar">crea tu cuenta</a>.
+        </p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <span class="badge rounded-pill badge-rol badge-rol-admin px-3 py-2">Admin</span>
+            <span class="badge rounded-pill badge-rol badge-rol-coordinador px-3 py-2">Coordinador</span>
+            <span class="badge rounded-pill badge-rol badge-rol-visita px-3 py-2">Visita</span>
+        </div>
+    </section>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="alf-card p-4 h-100">
+                <h2 class="h5"><i class="bi bi-shield-lock me-2"></i>Admin</h2>
+                <p class="mb-0">Control total: usuarios, roles, configuración y contenido.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="alf-card p-4 h-100">
+                <h2 class="h5"><i class="bi bi-pencil-square me-2"></i>Coordinador</h2>
+                <p class="mb-0">Crea y edita contenido. No gestiona usuarios.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="alf-card p-4 h-100">
+                <h2 class="h5"><i class="bi bi-eye me-2"></i>Visita</h2>
+                <p class="mb-0">Solo puede ver. Es el rol de toda cuenta nueva.</p>
+            </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="alf-card p-4 h-100">
-            <h2 class="h5"><i class="bi bi-pencil-square me-2"></i>Coordinador</h2>
-            <p class="mb-0">Crea y edita contenido. No gestiona usuarios.</p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="alf-card p-4 h-100">
-            <h2 class="h5"><i class="bi bi-eye me-2"></i>Visita</h2>
-            <p class="mb-0">Solo puede ver. Es el rol de toda cuenta nueva.</p>
-        </div>
-    </div>
-</div>
+}

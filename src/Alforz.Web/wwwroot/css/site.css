@@ -105,7 +105,7 @@ body { margin-bottom: 64px; }
   padding: 3rem 1.5rem;
 }
 
-/* ---------- Overview de la compañía (página Ingresar) ---------- */
+/* ---------- Overview de la compañía (inicio, al estar logueado) ---------- */
 .alf-overview {
   background: linear-gradient(150deg, var(--alf-celeste), var(--alf-lavanda) 65%, var(--alf-menta));
   border-radius: 1.25rem;
