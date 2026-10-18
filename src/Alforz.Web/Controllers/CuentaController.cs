@@ -17,6 +17,11 @@ public class CuentaController(
     ILogger<CuentaController> logger) : Controller
 {
     private const string AvisoCodigoEnviado = "Si los datos son correctos, te enviamos un código a tu correo.";
+    private const string CuentaSinValidar =
+        "Tu cuenta todavía no está validada. Revisa tu casilla de correo (también Spam y Promociones) " +
+        "y escribe acá el código que te enviamos.";
+    private const string CodigoNuevo = "Te mandamos un código nuevo.";
+    private const string CodigoReciente = "Ya te enviamos un código hace muy poco: búscalo en tu correo o espera un minuto para pedir otro.";
     private const int DiasRecordarme = 30;
     private const string ErrorCorreo ="No pudimos enviar el correo. Inténtalo de nuevo en unos minutos.";
 
@@ -56,8 +61,8 @@ public class CuentaController(
                     : RedirectToAction("Index", "Home");
 
             case EstadoIngreso.CorreoSinVerificar:
-                await IntentarEnviarCodigoAsync(resultado.Usuario!, TipoToken.VerificacionCorreo);
-                TempData["Aviso"] = $"Antes de entrar tienes que verificar tu correo. {TempData.Peek("Aviso")}";
+                var estadoCodigo = await IntentarEnviarCodigoAsync(resultado.Usuario!, TipoToken.VerificacionCorreo);
+                TempData["Aviso"] = $"{CuentaSinValidar} {estadoCodigo}";
                 return RedirectToAction(nameof(VerificarCorreo), new { correo = resultado.Usuario!.Correo });
 
             case EstadoIngreso.Bloqueado:
@@ -106,15 +111,24 @@ public class CuentaController(
 
         try
         {
-            var (resultado, usuario) = await cuentas.RegistrarAsync(modelo.NombreUsuario, modelo.Correo, modelo.Clave);
-            if (!resultado.Exito)
+            var registro = await cuentas.RegistrarAsync(modelo.NombreUsuario, modelo.Correo, modelo.Clave);
+            if (!registro.Resultado.Exito)
             {
-                ModelState.AddModelError(string.Empty, resultado.Error!);
+                ModelState.AddModelError(string.Empty, registro.Resultado.Error!);
                 return View(modelo);
             }
 
-            TempData["Exito"] = "Cuenta creada. Te enviamos un código para verificar tu correo.";
-            return RedirectToAction(nameof(VerificarCorreo), new { correo = usuario!.Correo });
+            if (registro.PendienteDeVerificar)
+            {
+                // Ya se había registrado con ese correo y no validó: en vez de "ya existe", que valide.
+                TempData["Aviso"] = $"Ya tienes una cuenta con ese correo. {CuentaSinValidar} " +
+                    (registro.CodigoReenviado ? CodigoNuevo : CodigoReciente);
+            }
+            else
+            {
+                TempData["Exito"] = "Cuenta creada. Te enviamos un código para verificar tu correo.";
+            }
+            return RedirectToAction(nameof(VerificarCorreo), new { correo = registro.Usuario!.Correo });
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -152,10 +166,15 @@ public class CuentaController(
     public async Task<IActionResult> ReenviarCodigo(string correo)
     {
         var usuario = string.IsNullOrWhiteSpace(correo) ? null : await usuarios.ObtenerPorCorreoAsync(correo);
+        // Si se envió, el mismo mensaje que cuando la cuenta no existe, para no revelar qué correos están registrados.
+        var aviso = AvisoCodigoEnviado;
         if (usuario is { CorreoVerificado: false, Activo: true })
-            await IntentarEnviarCodigoAsync(usuario, TipoToken.VerificacionCorreo);
-        else
-            TempData["Aviso"] = AvisoCodigoEnviado;
+        {
+            var estado = await IntentarEnviarCodigoAsync(usuario, TipoToken.VerificacionCorreo);
+            if (estado != CodigoNuevo)
+                aviso = estado;
+        }
+        TempData["Aviso"] = aviso;
 
         return RedirectToAction(nameof(VerificarCorreo), new { correo });
     }
@@ -211,18 +230,17 @@ public class CuentaController(
     [HttpGet]
     public IActionResult AccesoDenegado() => View();
 
-    private async Task IntentarEnviarCodigoAsync(Usuario usuario, TipoToken tipo)
+    /// <summary>Manda un código y devuelve la frase que explica qué pasó (enviado, enviado hace poco o error).</summary>
+    private async Task<string> IntentarEnviarCodigoAsync(Usuario usuario, TipoToken tipo)
     {
         try
         {
-            TempData["Aviso"] = await cuentas.EnviarCodigoAsync(usuario, tipo)
-                ? AvisoCodigoEnviado
-                : "Ya te enviamos un código hace muy poco. Revisa tu correo (también spam) o espera un minuto.";
+            return await cuentas.EnviarCodigoAsync(usuario, tipo) ? CodigoNuevo : CodigoReciente;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             logger.LogError(ex, "Error al enviar código {Tipo} a {UsuarioId}", tipo, usuario.Id);
-            TempData["Aviso"] = ErrorCorreo;
+            return ErrorCorreo;
         }
     }
 }

@@ -29,16 +29,27 @@ public class CuentaService(
 
     private readonly SeguridadSettings _seguridad = opciones.Value;
 
-    public async Task<(Resultado Resultado, Usuario? Usuario)> RegistrarAsync(string nombreUsuario, string correoUsuario, string clave)
+    public async Task<ResultadoRegistro> RegistrarAsync(string nombreUsuario, string correoUsuario, string clave)
     {
         nombreUsuario = nombreUsuario.Trim();
         correoUsuario = correoUsuario.Trim();
 
-        if (await usuarios.ObtenerPorNombreUsuarioAsync(nombreUsuario) is not null)
-            return (Resultado.Falla("Ese nombre de usuario ya está en uso."), null);
+        // Si ese correo ya tiene una cuenta sin verificar, no es un error: es la misma persona que no
+        // encontró el código. Se le manda uno nuevo. La clave NO se cambia: si no, cualquiera que conozca
+        // el correo podría poner su propia clave y entrar apenas la dueña verifique.
+        var porCorreo = await usuarios.ObtenerPorCorreoAsync(correoUsuario);
+        if (porCorreo is { CorreoVerificado: false, Activo: true })
+        {
+            var enviado = await EnviarCodigoAsync(porCorreo, TipoToken.VerificacionCorreo);
+            logger.LogInformation("Registro repetido de una cuenta sin verificar {UsuarioId}", porCorreo.Id);
+            return new ResultadoRegistro(Resultado.Ok, porCorreo, PendienteDeVerificar: true, CodigoReenviado: enviado);
+        }
 
-        if (await usuarios.ObtenerPorCorreoAsync(correoUsuario) is not null)
-            return (Resultado.Falla("Ya hay una cuenta con ese correo."), null);
+        if (await usuarios.ObtenerPorNombreUsuarioAsync(nombreUsuario) is not null)
+            return new ResultadoRegistro(Resultado.Falla("Ese nombre de usuario ya está en uso."), null);
+
+        if (porCorreo is not null)
+            return new ResultadoRegistro(Resultado.Falla("Ya hay una cuenta con ese correo. Ingresa o recupera tu clave."), null);
 
         var usuario = new Usuario
         {
@@ -56,7 +67,7 @@ public class CuentaService(
         logger.LogInformation("Usuario registrado {UsuarioId} ({Nombre})", usuario.Id, usuario.NombreUsuario);
 
         await EnviarCodigoAsync(usuario, TipoToken.VerificacionCorreo);
-        return (Resultado.Ok, usuario);
+        return new ResultadoRegistro(Resultado.Ok, usuario);
     }
 
     public async Task<ResultadoIngreso> IngresarAsync(string usuarioOCorreo, string clave)

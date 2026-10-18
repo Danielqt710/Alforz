@@ -20,10 +20,17 @@ public record Resultado(bool Exito, string? Error = null)
     public static Resultado Falla(string error) => new(false, error);
 }
 
+/// <summary>
+/// Resultado del registro. <paramref name="PendienteDeVerificar"/>: el correo ya tenía una cuenta sin verificar
+/// (no se creó otra); <paramref name="CodigoReenviado"/> dice si se le mandó un código nuevo.
+/// </summary>
+public record ResultadoRegistro(
+    Resultado Resultado, Usuario? Usuario, bool PendienteDeVerificar = false, bool CodigoReenviado = false);
+
 /// <summary>Registro, ingreso, verificación de correo y recuperación de clave.</summary>
 public interface ICuentaService
 {
-    Task<(Resultado Resultado, Usuario? Usuario)> RegistrarAsync(string nombreUsuario, string correo, string clave);
+    Task<ResultadoRegistro> RegistrarAsync(string nombreUsuario, string correo, string clave);
 
     Task<ResultadoIngreso> IngresarAsync(string usuarioOCorreo, string clave);
 
