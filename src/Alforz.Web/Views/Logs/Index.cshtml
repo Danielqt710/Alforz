@@ -1,0 +1,88 @@
+@model LogsViewModel
+@{
+    ViewData["Title"] = "Logs";
+    var niveles = new (string? Valor, string Texto)[]
+    {
+        (null, "Todos"), ("errores", "Errores"), ("avisos", "Avisos"), ("info", "Información")
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-journal-text me-2"></i>Logs</h1>
+    <span class="text-body-secondary small">
+        @Model.Registros.Count de los últimos @Model.Revisados · se guardan @Model.DiasRetencion días
+    </span>
+</div>
+
+@if (!Model.GuardadoActivo)
+{
+    <div class="alert alert-alf-aviso"><i class="bi bi-info-circle me-2"></i>En este ambiente el guardado de logs está apagado (Logs:GuardarEnFirestore). Abajo se ven los que guardó el servidor publicado.</div>
+}
+
+<form method="get" class="alf-card p-3 mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-5">
+            <label for="buscar" class="form-label small mb-1">Buscar</label>
+            <input type="search" id="buscar" name="buscar" value="@Model.Buscar" class="form-control" placeholder="Ej.: yenro, turno, correo, error…" />
+        </div>
+        <div class="col-6 col-md-3">
+            <label for="nivel" class="form-label small mb-1">Tipo</label>
+            <select id="nivel" name="nivel" class="form-select" onchange="this.form.submit()">
+                @foreach (var (valor, texto) in niveles)
+                {
+                    <option value="@valor" selected="@(valor == Model.Nivel)">@texto</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="cantidad" class="form-label small mb-1">Revisar</label>
+            <select id="cantidad" name="cantidad" class="form-select" onchange="this.form.submit()">
+                @foreach (var n in new[] { 100, 300, 1000 })
+                {
+                    <option value="@n" selected="@(n == Model.Cantidad)">últimos @n</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+            <button type="submit" class="btn btn-alf-primario"><i class="bi bi-search me-1"></i>Filtrar</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.Registros.Count == 0)
+{
+    <div class="alf-card p-4 text-center text-body-secondary">No hay logs que coincidan.</div>
+}
+else
+{
+    <div class="d-grid gap-2">
+        @foreach (var r in Model.Registros)
+        {
+            var (clase, icono, texto) = r.Nivel switch
+            {
+                "Error" or "Critical" => ("error", "bi-x-octagon", "Error"),
+                "Warning" => ("aviso", "bi-exclamation-triangle", "Aviso"),
+                _ => ("info", "bi-info-circle", "Info")
+            };
+            <div class="alf-log alf-log-@clase">
+                <div class="d-flex flex-wrap align-items-center gap-2 small mb-1">
+                    <span class="badge rounded-pill alf-log-nivel"><i class="bi @icono me-1"></i>@texto</span>
+                    <span class="fw-semibold">@Model.HoraLocal(r.Fecha).ToString("dd/MM HH:mm:ss")</span>
+                    <span class="text-body-secondary">@LogsViewModel.CategoriaCorta(r.Categoria)</span>
+                    @if (r.Origen != "Production")
+                    {
+                        <span class="badge rounded-pill text-bg-light">@r.Origen</span>
+                    }
+                </div>
+                <div class="alf-log-mensaje">@r.Mensaje</div>
+                @if (!string.IsNullOrEmpty(r.Excepcion))
+                {
+                    <details class="mt-1">
+                        <summary class="small">Ver detalle del error</summary>
+                        <pre class="alf-log-excepcion">@r.Excepcion</pre>
+                    </details>
+                }
+            </div>
+        }
+    </div>
+}

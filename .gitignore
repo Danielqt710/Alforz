@@ -34,6 +34,8 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+# Excepción: la sección Logs de la app es código, no archivos de log.
+!src/Alforz.Web/Views/Logs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
