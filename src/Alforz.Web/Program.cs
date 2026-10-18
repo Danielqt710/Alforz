@@ -5,9 +5,23 @@ using Alforz.Web.Repositories.Interfaces;
 using Alforz.Web.Services;
 using Alforz.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// En Render (y otros hosts con Docker) el puerto llega en la variable PORT.
+if (Environment.GetEnvironmentVariable("PORT") is { Length: > 0 } puerto)
+    builder.WebHost.UseUrls($"http://0.0.0.0:{puerto}");
+
+// Detrás del proxy del host la app recibe HTTP: estos encabezados le dicen que el visitante usa HTTPS,
+// así funcionan la redirección a HTTPS y la cookie segura.
+builder.Services.Configure<ForwardedHeadersOptions>(opciones =>
+{
+    opciones.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    opciones.KnownIPNetworks.Clear();
+    opciones.KnownProxies.Clear();
+});
 
 // Configuración tipada (los secretos van en user-secrets o variables de entorno)
 builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection(FirebaseSettings.Seccion));
@@ -60,6 +74,8 @@ catch (Exception ex)
     // Un problema de conexión con Firestore no debe impedir que la app levante.
     app.Logger.LogError(ex, "No se pudo revisar/crear el Admin inicial en Firestore");
 }
+
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {

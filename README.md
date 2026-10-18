@@ -81,6 +81,27 @@ Para restringir una página por rol:
 [Authorize(Roles = Roles.Admin)]         // solo Admin
 ```
 
+## Publicar en Render
+
+El `Dockerfile` de la raíz arma la app. En Render: **New → Web Service**, conectar este repo,
+runtime **Docker**, plan **Free**. Cada push a `main` se publica solo.
+
+Variables de entorno (el `__` reemplaza a `:`):
+
+| Variable | Valor |
+| --- | --- |
+| `Firebase__ProjectId` | id del proyecto |
+| `Firebase__CredentialsPath` | `/etc/secrets/alforz-firebase.json` |
+| `Email__SmtpUser` | login SMTP de Brevo |
+| `Email__SmtpPassword` | clave SMTP de Brevo |
+| `Email__FromAddress` | remitente verificado en Brevo |
+| `Email__SmtpPort` | `2525` (Render gratis bloquea el 587) |
+
+Y un **Secret File** llamado `alforz-firebase.json` con el contenido del JSON de la cuenta de servicio.
+
+En el plan gratis el servicio se duerme tras 15 min sin visitas (la primera carga tarda ~1 min)
+y cada nueva publicación cierra las sesiones abiertas.
+
 ## Correr
 
 ```bash
