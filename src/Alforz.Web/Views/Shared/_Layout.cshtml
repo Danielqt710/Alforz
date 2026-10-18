@@ -28,8 +28,17 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Turnos" asp-action="Index">Agendar turno</a>
+                            </li>
+                        }
                         @if (User.IsInRole(Roles.Admin))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Turnos" asp-action="Panel">Turnos</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
                             </li>

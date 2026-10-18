@@ -1,0 +1,87 @@
+@using Alforz.Web.Helpers
+@using Alforz.Web.Services.Interfaces
+@model PanelTurnosViewModel
+@{
+    ViewData["Title"] = "Turnos";
+    var filtros = new (FiltroTurnos Filtro, string Texto)[]
+    {
+        (FiltroTurnos.Proximos, "Próximos"),
+        (FiltroTurnos.Pasados, "Pasados"),
+        (FiltroTurnos.Cancelados, "Cancelados"),
+        (FiltroTurnos.Todos, "Todos")
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-calendar3 me-2"></i>Turnos</h1>
+    <span class="text-body-secondary">@Model.Turnos.Count @(Model.Turnos.Count == 1 ? "turno" : "turnos")</span>
+</div>
+
+<nav class="d-flex gap-2 flex-wrap mb-3" aria-label="Filtrar turnos">
+    @foreach (var (filtro, texto) in filtros)
+    {
+        <a asp-action="Panel" asp-route-filtro="@filtro"
+           class="btn btn-sm @(filtro == Model.Filtro ? "btn-alf-primario" : "btn-alf-secundario")"
+           aria-current="@(filtro == Model.Filtro ? "page" : null)">@texto</a>
+    }
+</nav>
+
+@if (Model.Turnos.Count == 0)
+{
+    <div class="alf-card p-4 text-center text-body-secondary">No hay turnos en esta lista.</div>
+}
+else
+{
+    <div class="alf-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Usuario</th>
+                        <th>Comentario</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Turnos)
+                    {
+                        var pasado = Model.Pasados.Contains(t.Id);
+                        var (estado, clase) = !t.EstaActivo ? ("Cancelado", "cancelado")
+                                            : pasado ? ("Realizado", "pasado")
+                                            : ("Activo", "activo");
+                        <tr>
+                            <td class="text-nowrap">@FormatoTurno.DiaCorto(t.Dia)</td>
+                            <td class="text-nowrap">@FormatoTurno.Horario(t.HoraInicio, t.DuracionHoras)</td>
+                            <td>
+                                <div class="fw-semibold">@t.NombreUsuario</div>
+                                <div class="small text-body-secondary">@t.Correo</div>
+                            </td>
+                            <td class="small">@(string.IsNullOrWhiteSpace(t.Comentario) ? "—" : t.Comentario)</td>
+                            <td>
+                                <span class="badge rounded-pill alf-estado-turno alf-estado-@clase">@estado</span>
+                                @if (!t.EstaActivo && !string.IsNullOrEmpty(t.CanceladoPor))
+                                {
+                                    <div class="small text-body-secondary">por @t.CanceladoPor</div>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (t.EstaActivo && !pasado)
+                                {
+                                    <form asp-action="Cancelar" method="post" class="d-inline"
+                                          onsubmit="return confirm('¿Cancelar este turno? Le avisaremos por correo a quien lo agendó.');">
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <input type="hidden" name="filtro" value="@Model.Filtro" />
+                                        <button type="submit" class="btn btn-sm btn-alf-secundario"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -83,6 +83,16 @@ Para restringir una página por rol:
 [Authorize(Roles = Roles.Admin)]         // solo Admin
 ```
 
+## Turnos
+
+- `/Turnos`: cualquier usuario logueado elige día y horario (turnos de 2 h, de 8 a 18, lunes a viernes)
+  y recibe la confirmación por correo. Los horarios tomados aparecen como **Ocupado**.
+- `/Turnos/Panel`: solo Admin. Ve todos los turnos (próximos, pasados, cancelados) y puede cancelar
+  cualquiera; a quien lo agendó le llega un aviso por correo.
+- Dos personas no pueden quedarse con el mismo horario: la reserva se hace en una transacción de Firestore.
+- Cada usuario puede tener hasta 3 turnos próximos. Todo se ajusta en la sección `Turnos` de `appsettings.json`
+  (los días de atención, en `Turnos:DiasLaborables`, con 0 = domingo ... 6 = sábado).
+
 ## Publicar en Render
 
 El `Dockerfile` de la raíz arma la app. En Render: **New → Web Service**, conectar este repo,

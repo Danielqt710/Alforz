@@ -137,6 +137,29 @@ body { margin-bottom: 64px; }
 .alf-overview-cita blockquote { font-style: italic; }
 .alf-overview-cita figcaption { font-size: .85rem; opacity: .8; }
 
+/* ---------- Turnos ---------- */
+.alf-horarios { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+@media (min-width: 576px) { .alf-horarios { grid-template-columns: repeat(3, 1fr); } }
+.alf-horario {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: .75rem .5rem; border-radius: .9rem; border: 2px solid transparent;
+  cursor: pointer; text-align: center; user-select: none; transition: transform .1s;
+}
+.alf-horario-hora { font-weight: 800; }
+.alf-horario-estado { font-size: .8rem; }
+.alf-horario-libre { background: var(--alf-menta); }
+.alf-horario-libre:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--alf-menta) 60%, var(--alf-texto)); }
+.alf-horario-ocupado { background: color-mix(in srgb, var(--alf-lavanda) 60%, white); cursor: not-allowed; opacity: .75; }
+.alf-horario-ocupado .alf-horario-hora { text-decoration: line-through; }
+.alf-horario-pasado { background: #eef1f4; cursor: not-allowed; opacity: .6; }
+.btn-check:checked + .alf-horario { border-color: var(--alf-texto); background: var(--alf-celeste); }
+.btn-check:focus-visible + .alf-horario { box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--alf-celeste) 70%, transparent); }
+.alf-mi-turno { background: color-mix(in srgb, var(--alf-menta) 45%, white); border-radius: .9rem; padding: .75rem 1rem; }
+.alf-estado-turno { font-weight: 700; color: var(--alf-texto); }
+.alf-estado-activo    { background: var(--alf-menta); }
+.alf-estado-pasado    { background: #eef1f4; }
+.alf-estado-cancelado { background: var(--alf-lavanda); }
+
 /* ---------- Footer ---------- */
 .footer {
   position: absolute; bottom: 0; width: 100%;

@@ -33,6 +33,7 @@ builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection(Fi
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.Seccion));
 builder.Services.Configure<SeguridadSettings>(builder.Configuration.GetSection(SeguridadSettings.Seccion));
 builder.Services.Configure<AdminInicialSettings>(builder.Configuration.GetSection(AdminInicialSettings.Seccion));
+builder.Services.Configure<TurnosSettings>(builder.Configuration.GetSection(TurnosSettings.Seccion));
 
 // Helpers, repositorios y servicios
 builder.Services.AddSingleton<PasswordHelper>();
@@ -41,6 +42,8 @@ builder.Services.AddSingleton<IUsuarioRepository, FirestoreUsuarioRepository>();
 builder.Services.AddSingleton<ITokenRepository, FirestoreTokenRepository>();
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<ICuentaService, CuentaService>();
+builder.Services.AddSingleton<ITurnoRepository, FirestoreTurnoRepository>();
+builder.Services.AddScoped<ITurnoService, TurnoService>();
 builder.Services.AddScoped<ValidadorCookie>();
 
 // Claves que firman cookies y antiforgery: en Firestore, para que no se pierdan en cada deploy.

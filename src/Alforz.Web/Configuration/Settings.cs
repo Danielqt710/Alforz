@@ -45,6 +45,32 @@ public class SeguridadSettings
     public int SegundosEntreReenvios { get; set; } = 60;
 }
 
+/// <summary>Sección "Turnos": horario de atención y reglas para agendar.</summary>
+public class TurnosSettings
+{
+    public const string Seccion = "Turnos";
+
+    /// <summary>Hora del primer turno del día.</summary>
+    public int HoraApertura { get; set; } = 8;
+
+    /// <summary>Hora en que termina el último turno.</summary>
+    public int HoraCierre { get; set; } = 18;
+
+    public int DuracionHoras { get; set; } = 2;
+
+    /// <summary>Días con atención (1 = lunes ... 6 = sábado, 0 = domingo).</summary>
+    public int[] DiasLaborables { get; set; } = [1, 2, 3, 4, 5];
+
+    /// <summary>Hasta cuántos días hacia adelante se puede agendar.</summary>
+    public int DiasAnticipacionMax { get; set; } = 60;
+
+    /// <summary>Turnos futuros que puede tener activos un mismo usuario.</summary>
+    public int MaxTurnosActivosPorUsuario { get; set; } = 3;
+
+    /// <summary>Zona horaria del negocio (IANA), para saber qué horarios ya pasaron.</summary>
+    public string ZonaHoraria { get; set; } = "America/Argentina/Buenos_Aires";
+}
+
 /// <summary>
 /// Sección "AdminInicial": datos del primer Admin que se crea al arrancar si no hay ninguno.
 /// La clave va en user-secrets; después de crearlo se puede borrar.

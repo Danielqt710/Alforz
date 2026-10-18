@@ -1,0 +1,102 @@
+@using Alforz.Web.Helpers
+@using Alforz.Web.Services.Interfaces
+@model AgendarTurnoViewModel
+@{
+    ViewData["Title"] = "Agendar turno";
+    var fecha = FormatoTurno.Fecha(Model.Dia);
+    var hayLibres = Model.Horarios.Any(h => h.Estado == EstadoHorario.Libre);
+}
+
+<h1 class="h3 mb-3"><i class="bi bi-calendar-check me-2"></i>Agendar turno</h1>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="alf-card p-4">
+            @* Elegir el día: calendario del navegador + flechas para moverse de a un día. *@
+            <form asp-action="Index" method="get" class="mb-3">
+                <label for="fecha" class="form-label fw-semibold">1. Elige el día</label>
+                <div class="d-flex gap-2 align-items-center">
+                    @if (Model.DiaAnterior is { } anterior)
+                    {
+                        <a asp-action="Index" asp-route-fecha="@FormatoTurno.Fecha(anterior)" class="btn btn-alf-secundario" aria-label="Día anterior"><i class="bi bi-chevron-left"></i></a>
+                    }
+                    <input type="date" id="fecha" name="fecha" class="form-control" value="@fecha"
+                           min="@FormatoTurno.Fecha(Model.DiaMinimo)" max="@FormatoTurno.Fecha(Model.DiaMaximo)"
+                           onchange="this.form.submit()" />
+                    @if (Model.DiaSiguiente is { } siguiente)
+                    {
+                        <a asp-action="Index" asp-route-fecha="@FormatoTurno.Fecha(siguiente)" class="btn btn-alf-secundario" aria-label="Día siguiente"><i class="bi bi-chevron-right"></i></a>
+                    }
+                </div>
+                <noscript><button type="submit" class="btn btn-alf-secundario mt-2">Ver horarios</button></noscript>
+            </form>
+
+            <p class="fw-semibold mb-2">2. Elige el horario <span class="text-body-secondary fw-normal">· @FormatoTurno.Dia(Model.Dia)</span></p>
+
+            @if (!Model.EsDiaLaborable)
+            {
+                <div class="alert alert-alf-info mb-0"><i class="bi bi-moon-stars me-2"></i>Ese día no atendemos. Elige otro día.</div>
+            }
+            else if (!hayLibres)
+            {
+                <div class="alert alert-alf-aviso mb-3"><i class="bi bi-calendar-x me-2"></i>No quedan horarios libres este día. Prueba con otro.</div>
+            }
+
+            @if (Model.Horarios.Count > 0)
+            {
+                <form asp-action="Reservar" method="post">
+                    <input type="hidden" name="fecha" value="@fecha" />
+                    <div class="alf-horarios mb-3" role="radiogroup" aria-label="Horarios">
+                        @foreach (var h in Model.Horarios)
+                        {
+                            var id = $"hora-{h.HoraInicio}";
+                            var libre = h.Estado == EstadoHorario.Libre;
+                            <input type="radio" class="btn-check" name="hora" id="@id" value="@h.HoraInicio" required disabled="@(!libre)" />
+                            <label class="alf-horario alf-horario-@h.Estado.ToString().ToLowerInvariant()" for="@id">
+                                <span class="alf-horario-hora">@FormatoTurno.Horario(h.HoraInicio, h.DuracionHoras)</span>
+                                <span class="alf-horario-estado">
+                                    @(h.Estado switch { EstadoHorario.Libre => "Libre", EstadoHorario.Ocupado => "Ocupado", _ => "Ya pasó" })
+                                </span>
+                            </label>
+                        }
+                    </div>
+
+                    @if (hayLibres)
+                    {
+                        <label for="comentario" class="form-label fw-semibold">3. Comentario <span class="text-body-secondary fw-normal">(opcional)</span></label>
+                        <textarea id="comentario" name="comentario" class="form-control mb-3" rows="2" maxlength="300"
+                                  placeholder="Ej.: quiero ver la Serie H para mi casa"></textarea>
+                        <button type="submit" class="btn btn-alf-primario w-100"><i class="bi bi-check2-circle me-1"></i>Confirmar turno</button>
+                        <p class="form-text mb-0 mt-2">Cada turno dura @Model.Horarios[0].DuracionHoras horas. Te llegará la confirmación a tu correo.</p>
+                    }
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="alf-card p-4 h-100">
+            <h2 class="h5 mb-3"><i class="bi bi-calendar2-week me-2"></i>Mis próximos turnos</h2>
+            @if (Model.MisTurnos.Count == 0)
+            {
+                <p class="text-body-secondary mb-0">Todavía no tienes turnos agendados.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0 d-grid gap-2">
+                    @foreach (var t in Model.MisTurnos)
+                    {
+                        <li class="alf-mi-turno">
+                            <div class="fw-bold">@FormatoTurno.Dia(t.Dia)</div>
+                            <div>@FormatoTurno.Horario(t.HoraInicio, t.DuracionHoras)</div>
+                            @if (!string.IsNullOrWhiteSpace(t.Comentario))
+                            {
+                                <div class="small text-body-secondary">@t.Comentario</div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
