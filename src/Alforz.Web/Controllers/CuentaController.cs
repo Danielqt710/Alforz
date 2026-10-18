@@ -15,7 +15,8 @@ public class CuentaController(
     ILogger<CuentaController> logger) : Controller
 {
     private const string AvisoCodigoEnviado = "Si los datos son correctos, te enviamos un código a tu correo.";
-    private const string ErrorCorreo = "No pudimos enviar el correo. Inténtalo de nuevo en unos minutos.";
+    private const int DiasRecordarme = 30;
+    private const string ErrorCorreo ="No pudimos enviar el correo. Inténtalo de nuevo en unos minutos.";
 
     // ---------- Ingresar / Salir ----------
 
@@ -41,7 +42,12 @@ public class CuentaController(
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     cuentas.CrearPrincipal(resultado.Usuario!),
-                    new AuthenticationProperties { IsPersistent = modelo.Recordarme });
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = modelo.Recordarme,
+                        // Sin "Recordarme" vale ExpireTimeSpan (8 h). La renovación deslizante conserva este plazo.
+                        ExpiresUtc = modelo.Recordarme ? DateTimeOffset.UtcNow.AddDays(DiasRecordarme) : null
+                    });
                 return Url.IsLocalUrl(modelo.ReturnUrl)
                     ? LocalRedirect(modelo.ReturnUrl)
                     : RedirectToAction("Index", "Home");

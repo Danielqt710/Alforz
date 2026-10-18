@@ -62,7 +62,7 @@ dotnet user-secrets set "AdminInicial:Clave" "una-clave-segura-123"
 | --- | --- |
 | `/Cuenta/Registrar` | Crea una cuenta **Visita** y manda un código de 6 dígitos al correo |
 | `/Cuenta/VerificarCorreo` | Confirma el correo con el código (hay que hacerlo antes de entrar) |
-| `/Cuenta/Ingresar` | Entra con usuario **o** correo y clave (cookie de 8 h; "Recordarme" la mantiene al cerrar el navegador) |
+| `/Cuenta/Ingresar` | Entra con usuario **o** correo y clave (la sesión dura 8 h; con "Recordarme", 30 días aunque cierres el navegador) |
 | `/Cuenta/OlvideClave` → `/Cuenta/RestablecerClave` | Recuperar la clave con un código por correo |
 | `/Usuarios` | Solo Admin: cambiar roles y activar o desactivar cuentas |
 
