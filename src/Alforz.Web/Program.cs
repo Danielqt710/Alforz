@@ -1,5 +1,6 @@
 using Alforz.Web.Configuration;
 using Alforz.Web.Helpers;
+using Alforz.Web.Logging;
 using Alforz.Web.Repositories;
 using Alforz.Web.Repositories.Interfaces;
 using Alforz.Web.Services;
@@ -34,6 +35,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(opciones =>
     opciones.KnownProxies.Clear();
 });
 
+builder.Services.AddHttpsRedirection(opciones => opciones.HttpsPort = 443);
+
 // Configuración tipada (los secretos van en user-secrets o variables de entorno)
 builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection(FirebaseSettings.Seccion));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.Seccion));
@@ -52,6 +55,15 @@ builder.Services.AddSingleton<ITurnoRepository, FirestoreTurnoRepository>();
 builder.Services.AddSingleton<IRobotRepository, FirestoreRobotRepository>();
 builder.Services.AddScoped<ITurnoService, TurnoService>();
 builder.Services.AddScoped<ValidadorCookie>();
+
+// Logs en Firestore para verlos desde la sección Logs (además de la consola de Render).
+builder.Services.Configure<LogsSettings>(builder.Configuration.GetSection(LogsSettings.Seccion));
+if (builder.Configuration.GetValue($"{LogsSettings.Seccion}:{nameof(LogsSettings.GuardarEnFirestore)}", true))
+{
+    builder.Services.AddSingleton<ColaLogs>();
+    builder.Logging.Services.AddSingleton<ILoggerProvider, FirestoreLoggerProvider>();
+    builder.Services.AddHostedService<EscritorLogsFirestore>();
+}
 
 // Claves que firman cookies y antiforgery: en Firestore, para que no se pierdan en cada deploy.
 // Sin Firebase configurado quedan en disco, como antes.
@@ -128,9 +140,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    // Detrás del proxy el puerto HTTPS público es el 443 (sin esto avisa "Failed to determine the https port").
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
 app.UseRateLimiter();
 

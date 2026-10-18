@@ -3,7 +3,7 @@
 @if (User.Identity?.IsAuthenticated == true)
 {
     var rol = User.FindFirstValue(ClaimTypes.Role) ?? Roles.Visita;
-    <ul class="navbar-nav align-items-sm-center gap-sm-2">
+    <ul class="navbar-nav align-items-lg-center gap-lg-2">
         <li class="nav-item">
             <span class="navbar-text">
                 <i class="bi bi-person-circle me-1"></i>@User.Identity.Name
@@ -19,7 +19,7 @@
 }
 else
 {
-    <ul class="navbar-nav gap-sm-2">
+    <ul class="navbar-nav gap-lg-2">
         <li class="nav-item">
             <a class="nav-link" asp-controller="Cuenta" asp-action="Ingresar">Ingresar</a>
         </li>

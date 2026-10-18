@@ -45,6 +45,18 @@ public class SeguridadSettings
     public int SegundosEntreReenvios { get; set; } = 60;
 }
 
+/// <summary>Sección "Logs": guardado de logs en Firestore para verlos desde la app.</summary>
+public class LogsSettings
+{
+    public const string Seccion = "Logs";
+
+    /// <summary>En Development viene apagado para que las pruebas locales no se mezclen con los logs reales.</summary>
+    public bool GuardarEnFirestore { get; set; } = true;
+
+    /// <summary>Los logs más viejos que esto se borran solos una vez por día.</summary>
+    public int DiasRetencion { get; set; } = 30;
+}
+
 /// <summary>Sección "Turnos": horario de atención y reglas para agendar.</summary>
 public class TurnosSettings
 {

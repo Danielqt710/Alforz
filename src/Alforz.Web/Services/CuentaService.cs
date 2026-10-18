@@ -78,14 +78,23 @@ public class CuentaService(
             : await usuarios.ObtenerPorNombreUsuarioAsync(usuarioOCorreo);
 
         if (usuario is null)
+        {
+            // No se registra lo que escribió: a veces la gente pone la clave en el campo de usuario.
+            logger.LogInformation("Ingreso fallido: usuario o correo inexistente");
             return new(EstadoIngreso.CredencialesInvalidas);
+        }
 
         if (usuario.EstaBloqueado(ahora))
+        {
+            logger.LogInformation("Ingreso rechazado: {Nombre} está bloqueado", usuario.NombreUsuario);
             return new(EstadoIngreso.Bloqueado, BloqueadoHasta: usuario.BloqueadoHasta);
+        }
 
         var (correcta, requiereRehash) = claves.Verificar(usuario, clave);
         if (!correcta)
         {
+            logger.LogInformation("Ingreso fallido: clave incorrecta para {Nombre} (intento {Intento})",
+                usuario.NombreUsuario, usuario.IntentosFallidos + 1);
             usuario.IntentosFallidos++;
             if (usuario.IntentosFallidos >= _seguridad.MaxIntentosFallidos)
             {
@@ -101,10 +110,16 @@ public class CuentaService(
 
         // A partir de acá la clave es correcta: recién ahora se informa el estado de la cuenta.
         if (!usuario.Activo)
+        {
+            logger.LogInformation("Ingreso rechazado: {Nombre} está desactivado", usuario.NombreUsuario);
             return new(EstadoIngreso.Inactivo);
+        }
 
         if (!usuario.CorreoVerificado)
+        {
+            logger.LogInformation("Ingreso pendiente: {Nombre} todavía no validó su correo", usuario.NombreUsuario);
             return new(EstadoIngreso.CorreoSinVerificar, usuario);
+        }
 
         if (requiereRehash)
             usuario.ClaveHash = claves.Hashear(usuario, clave);
@@ -112,6 +127,7 @@ public class CuentaService(
         usuario.BloqueadoHasta = null;
         usuario.UltimoIngreso = ahora;
         await usuarios.ActualizarAsync(usuario);
+        logger.LogInformation("Ingreso correcto: {Nombre} ({Rol})", usuario.NombreUsuario, usuario.Rol);
 
         return new(EstadoIngreso.Correcto, usuario);
     }

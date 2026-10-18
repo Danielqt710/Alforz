@@ -105,6 +105,12 @@ Para restringir una página por rol:
 - Si la colección `robots` está vacía, al arrancar se cargan las 4 series: Hogar USD 5, Logística USD 8,
   Médica USD 11 e Industrial USD 14 (de 5 dólares, subiendo 3 por categoría).
 
+## Logs
+
+- `/Logs`: solo Admin. Últimos logs con búsqueda y filtro (errores, avisos, información).
+- Se guardan en la colección `logs`: los de la app desde Information y los del framework desde Warning.
+  Se borran solos a los 30 días (`Logs:DiasRetencion`). En Development no se guardan (`Logs:GuardarEnFirestore`).
+
 ## Publicar en Render
 
 El `Dockerfile` de la raíz arma la app. En Render: **New → Web Service**, conectar este repo,

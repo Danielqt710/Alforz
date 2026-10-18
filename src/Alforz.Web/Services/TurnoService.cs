@@ -20,7 +20,7 @@ public class TurnoService(
 
     private readonly TurnosSettings _config = opciones.Value;
 
-    private readonly TimeZoneInfo _zona = BuscarZona(opciones.Value.ZonaHoraria);
+    private readonly TimeZoneInfo _zona = ZonaHoraria.Buscar(opciones.Value.ZonaHoraria);
 
     public int DuracionHoras => _config.DuracionHoras;
 
@@ -305,17 +305,4 @@ public class TurnoService(
           <p style="margin-top:16px">Alforz Robotics</p>
         </div>
         """;
-
-    private static TimeZoneInfo BuscarZona(string id)
-    {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById(id);
-        }
-        catch (Exception ex) when (ex is TimeZoneNotFoundException or InvalidTimeZoneException)
-        {
-            // Sin datos de zonas en el sistema: Argentina no tiene horario de verano, UTC-3 fijo alcanza.
-            return TimeZoneInfo.CreateCustomTimeZone(id, TimeSpan.FromHours(-3), id, id);
-        }
-    }
 }
