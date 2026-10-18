@@ -11,6 +11,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app .
 ENV ASPNETCORE_ENVIRONMENT=Production
-# Render define PORT; si no está, se usa 8080 (el puerto por defecto de la imagen).
+# La app escucha en PORT (Render pone el suyo; si no, 8080). Se vacía HTTP_PORTS de la imagen
+# para que no avise "Overriding HTTP_PORTS" en cada arranque.
+ENV PORT=8080
+ENV ASPNETCORE_HTTP_PORTS=
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Alforz.Web.dll"]
