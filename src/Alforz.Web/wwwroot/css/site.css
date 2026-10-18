@@ -105,6 +105,38 @@ body { margin-bottom: 64px; }
   padding: 3rem 1.5rem;
 }
 
+/* ---------- Overview de la compañía (página Ingresar) ---------- */
+.alf-overview {
+  background: linear-gradient(150deg, var(--alf-celeste), var(--alf-lavanda) 65%, var(--alf-menta));
+  border-radius: 1.25rem;
+  padding: 2rem 1.5rem;
+}
+@media (min-width: 992px) { .alf-overview { padding: 2.5rem; } }
+.alf-overview-etiqueta {
+  display: inline-block; font-weight: 700; font-size: .85rem; letter-spacing: .03em;
+  background: rgba(255, 255, 255, .6); border-radius: 999px; padding: .3rem .8rem; margin-bottom: 1rem;
+}
+.alf-overview-titulo { font-weight: 800; font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.15; margin-bottom: .75rem; }
+.alf-overview-texto { margin-bottom: 1.5rem; }
+.alf-overview-dato {
+  background: rgba(255, 255, 255, .65); border-radius: .9rem; padding: .75rem .5rem; text-align: center; height: 100%;
+}
+.alf-overview-dato strong { display: block; font-size: 1.15rem; font-weight: 800; }
+.alf-overview-dato span { display: block; font-size: .8rem; line-height: 1.2; }
+.alf-overview-subtitulo { font-size: 1rem; font-weight: 800; margin-bottom: .75rem; }
+.alf-overview-lineas { list-style: none; padding: 0; margin: 0 0 1.5rem; display: grid; gap: .6rem; }
+@media (min-width: 576px) { .alf-overview-lineas { grid-template-columns: 1fr 1fr; } }
+.alf-overview-lineas li {
+  display: flex; gap: .75rem; align-items: flex-start;
+  background: rgba(255, 255, 255, .5); border-radius: .9rem; padding: .75rem;
+}
+.alf-overview-lineas i { font-size: 1.4rem; line-height: 1; }
+.alf-overview-lineas strong { display: block; font-size: .95rem; }
+.alf-overview-lineas span { display: block; font-size: .85rem; line-height: 1.3; }
+.alf-overview-cita { border-left: 4px solid var(--alf-texto); padding-left: 1rem; }
+.alf-overview-cita blockquote { font-style: italic; }
+.alf-overview-cita figcaption { font-size: .85rem; opacity: .8; }
+
 /* ---------- Footer ---------- */
 .footer {
   position: absolute; bottom: 0; width: 100%;

@@ -3,10 +3,18 @@
     ViewData["Title"] = "Ingresar";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
+<div class="row g-4 justify-content-center align-items-stretch">
+    @* En celular primero el formulario y debajo la presentación; en escritorio, lado a lado. *@
+    <div class="col-lg-7 order-2 order-lg-1">
+        <partial name="_OverviewAlforz" />
+    </div>
+    <div class="col-md-8 col-lg-5 order-1 order-lg-2 d-flex flex-column justify-content-center">
         <div class="alf-card p-4">
-            <h1 class="h3 mb-4"><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar</h1>
+            <h1 class="h3 mb-1"><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar</h1>
+            <p class="text-body-secondary mb-4">
+                Bienvenido a Alforz Robotics.
+                <a href="#overview" class="d-lg-none">Conoce la compañía <i class="bi bi-arrow-down-short"></i></a>
+            </p>
             <form asp-action="Ingresar" method="post">
                 <input type="hidden" asp-for="ReturnUrl" />
                 <div asp-validation-summary="ModelOnly" class="mb-3"></div>
