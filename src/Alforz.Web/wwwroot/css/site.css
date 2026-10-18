@@ -154,6 +154,20 @@ body { margin-bottom: 64px; }
 .alf-horario-pasado { background: #eef1f4; cursor: not-allowed; opacity: .6; }
 .btn-check:checked + .alf-horario { border-color: var(--alf-texto); background: var(--alf-celeste); }
 .btn-check:focus-visible + .alf-horario { box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--alf-celeste) 70%, transparent); }
+.alf-robots { display: grid; gap: .6rem; }
+@media (min-width: 576px) { .alf-robots { grid-template-columns: 1fr 1fr; } }
+.alf-robot {
+  display: flex; align-items: center; gap: .75rem; padding: .75rem; cursor: pointer;
+  background: white; border: 2px solid var(--alf-lavanda); border-radius: .9rem; transition: transform .1s;
+}
+.alf-robot:hover { transform: translateY(-1px); border-color: var(--alf-celeste-fuerte); }
+.alf-robot-icono { font-size: 1.6rem; flex-shrink: 0; }
+.alf-robot-texto { flex: 1; min-width: 0; }
+.alf-robot-nombre { display: block; font-weight: 800; line-height: 1.2; }
+.alf-robot-desc { display: block; font-size: .8rem; line-height: 1.25; opacity: .8; }
+.alf-robot-precio { font-weight: 800; white-space: nowrap; background: var(--alf-menta); border-radius: 999px; padding: .2rem .6rem; }
+.btn-check:checked + .alf-robot { border-color: var(--alf-texto); background: var(--alf-celeste); }
+.btn-check:focus-visible + .alf-robot { box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--alf-celeste) 70%, transparent); }
 .alf-mi-turno { background: color-mix(in srgb, var(--alf-menta) 45%, white); border-radius: .9rem; padding: .75rem 1rem; }
 .alf-estado-turno { font-weight: 700; color: var(--alf-texto); }
 .alf-estado-activo    { background: var(--alf-menta); }

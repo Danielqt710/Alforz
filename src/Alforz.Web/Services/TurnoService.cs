@@ -11,6 +11,7 @@ namespace Alforz.Web.Services;
 public class TurnoService(
     ITurnoRepository turnos,
     IUsuarioRepository usuarios,
+    IRobotRepository robots,
     IEmailService correo,
     IOptions<TurnosSettings> opciones,
     ILogger<TurnoService> logger) : ITurnoService
@@ -60,13 +61,17 @@ public class TurnoService(
     }
 
     public async Task<ResultadoTurno> ReservarAsync(
-        string usuarioId, string nombreUsuario, string correoUsuario, DateOnly dia, int horaInicio, string? comentario)
+        string usuarioId, string nombreUsuario, string correoUsuario, DateOnly dia, int horaInicio, string robotId, string? comentario)
     {
         if (!EsDiaLaborable(dia) || dia < Hoy || dia > UltimoDiaAgendable || !HorasDelDia().Contains(horaInicio))
             return ResultadoTurno.Falla("Ese horario no está disponible para agendar.");
 
         if (YaEmpezo(dia, horaInicio))
             return ResultadoTurno.Falla("Ese horario ya pasó. Elige otro.");
+
+        var robot = await robots.ObtenerPorIdAsync(robotId);
+        if (robot is not { Activo: true })
+            return ResultadoTurno.Falla("Elige qué robot quieres ver.");
 
         var activos = (await turnos.ListarDeUsuarioAsync(usuarioId)).Count(t => t.EstaActivo && !YaPaso(t));
         if (activos >= _config.MaxTurnosActivosPorUsuario)
@@ -86,6 +91,9 @@ public class TurnoService(
             HoraInicio = horaInicio,
             DuracionHoras = _config.DuracionHoras,
             Comentario = nota,
+            RobotId = robot.Id,
+            RobotNombre = robot.Nombre,
+            RobotPrecio = robot.Precio,
             FechaCreacion = DateTime.UtcNow
         };
 
@@ -264,6 +272,9 @@ public class TurnoService(
         var comentario = string.IsNullOrWhiteSpace(turno.Comentario)
             ? string.Empty
             : $"<p><strong>Comentario:</strong> {WebUtility.HtmlEncode(turno.Comentario)}</p>";
+        var robot = turno.TieneRobot
+            ? $"<p><strong>Robot:</strong> {WebUtility.HtmlEncode(turno.RobotNombre)} · {FormatoPrecio.Dolares(turno.RobotPrecio)}</p>"
+            : string.Empty;
 
         return $"""
             <div style="font-family:Segoe UI,Arial,sans-serif;color:#2F3A4A;max-width:480px;margin:auto">
@@ -274,6 +285,7 @@ public class TurnoService(
                 <div style="font-size:18px;font-weight:bold">{FormatoTurno.Dia(turno.Dia)}</div>
                 <div style="font-size:24px;font-weight:bold;margin-top:4px">{FormatoTurno.Horario(turno.HoraInicio, turno.DuracionHoras)}</div>
               </div>
+              {robot}
               {comentario}
               <p style="margin-top:16px">Alforz Robotics</p>
             </div>

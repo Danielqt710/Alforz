@@ -65,10 +65,37 @@
 
                     @if (hayLibres)
                     {
-                        <label for="comentario" class="form-label fw-semibold">3. Comentario <span class="text-body-secondary fw-normal">(opcional)</span></label>
+                        <p class="fw-semibold mb-2">3. ¿Qué robot quieres ver?</p>
+                        @if (Model.Robots.Count == 0)
+                        {
+                            <div class="alert alert-alf-aviso mb-3">Por ahora no hay robots disponibles para ver.</div>
+                        }
+                        else
+                        {
+                            <div class="alf-robots mb-3" role="radiogroup" aria-label="Robots">
+                                @foreach (var r in Model.Robots)
+                                {
+                                    var id = $"robot-{r.Id}";
+                                    <input type="radio" class="btn-check" name="robotId" id="@id" value="@r.Id" required />
+                                    <label class="alf-robot" for="@id">
+                                        <i class="bi bi-robot alf-robot-icono" aria-hidden="true"></i>
+                                        <span class="alf-robot-texto">
+                                            <span class="alf-robot-nombre">@r.Nombre</span>
+                                            @if (!string.IsNullOrWhiteSpace(r.Descripcion))
+                                            {
+                                                <span class="alf-robot-desc">@r.Descripcion</span>
+                                            }
+                                        </span>
+                                        <span class="alf-robot-precio">@FormatoPrecio.Dolares(r.Precio)</span>
+                                    </label>
+                                }
+                            </div>
+                        }
+
+                        <label for="comentario" class="form-label fw-semibold">4. Comentario <span class="text-body-secondary fw-normal">(opcional)</span></label>
                         <textarea id="comentario" name="comentario" class="form-control mb-3" rows="2" maxlength="300"
-                                  placeholder="Ej.: quiero ver la Serie H para mi casa"></textarea>
-                        <button type="submit" class="btn btn-alf-primario w-100"><i class="bi bi-check2-circle me-1"></i>Confirmar turno</button>
+                                  placeholder="Ej.: es para usar en mi casa"></textarea>
+                        <button type="submit" class="btn btn-alf-primario w-100" disabled="@(Model.Robots.Count == 0)"><i class="bi bi-check2-circle me-1"></i>Confirmar turno</button>
                         <p class="form-text mb-0 mt-2">Cada turno dura @Model.Horarios[0].DuracionHoras horas. Te llegará la confirmación a tu correo.</p>
                     }
                 </form>
@@ -91,6 +118,10 @@
                         <li class="alf-mi-turno">
                             <div class="fw-bold">@FormatoTurno.Dia(t.Dia)</div>
                             <div>@FormatoTurno.Horario(t.HoraInicio, t.DuracionHoras)</div>
+                            @if (t.TieneRobot)
+                            {
+                                <div class="small"><i class="bi bi-robot me-1"></i>@t.RobotNombre · @FormatoPrecio.Dolares(t.RobotPrecio)</div>
+                            }
                             @if (!string.IsNullOrWhiteSpace(t.Comentario))
                             {
                                 <div class="small text-body-secondary">@t.Comentario</div>

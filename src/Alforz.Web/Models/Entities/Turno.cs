@@ -41,6 +41,18 @@ public class Turno
     [FirestoreProperty]
     public string Comentario { get; set; } = string.Empty;
 
+    /// <summary>Robot que la persona quiere ver. Nombre y precio se copian al agendar, por si después cambian.</summary>
+    [FirestoreProperty]
+    public string RobotId { get; set; } = string.Empty;
+
+    [FirestoreProperty]
+    public string RobotNombre { get; set; } = string.Empty;
+
+    [FirestoreProperty]
+    public double RobotPrecio { get; set; }
+
+    public bool TieneRobot => !string.IsNullOrEmpty(RobotNombre);
+
     /// <summary>Uno de los valores de <see cref="EstadoTurno"/>.</summary>
     [FirestoreProperty]
     public string Estado { get; set; } = EstadoTurno.Activo;

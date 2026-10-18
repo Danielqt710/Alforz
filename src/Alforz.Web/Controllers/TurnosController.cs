@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Alforz.Web.Helpers;
 using Alforz.Web.Models;
 using Alforz.Web.Models.ViewModels;
+using Alforz.Web.Repositories.Interfaces;
 using Alforz.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace Alforz.Web.Controllers;
 
 /// <summary>Agendar turnos (cualquier usuario logueado) y panel de turnos (solo Admin).</summary>
 [Authorize]
-public class TurnosController(ITurnoService turnos) : Controller
+public class TurnosController(ITurnoService turnos, IRobotRepository robots) : Controller
 {
     private string UsuarioId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
@@ -31,13 +32,14 @@ public class TurnosController(ITurnoService turnos) : Controller
             EsDiaLaborable = turnos.EsDiaLaborable(dia),
             Horarios = await turnos.HorariosDelDiaAsync(dia),
             MisTurnos = await turnos.TurnosDeUsuarioAsync(UsuarioId),
-            Progreso = await turnos.ProgresoPremioAsync(UsuarioId)
+            Progreso = await turnos.ProgresoPremioAsync(UsuarioId),
+            Robots = (await robots.ListarAsync()).Where(r => r.Activo).ToList()
         });
     }
 
     [HttpPost]
     [EnableRateLimiting(LimitesCuenta.Correos)]
-    public async Task<IActionResult> Reservar(string fecha, int hora, string? comentario)
+    public async Task<IActionResult> Reservar(string fecha, int hora, string? robotId, string? comentario)
     {
         if (!DateOnly.TryParseExact(fecha, "yyyy-MM-dd", out var dia))
             return RedirectToAction(nameof(Index));
@@ -46,7 +48,7 @@ public class TurnosController(ITurnoService turnos) : Controller
             UsuarioId,
             User.Identity?.Name ?? string.Empty,
             User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
-            dia, hora, comentario);
+            dia, hora, robotId ?? string.Empty, comentario);
 
         if (!resultado.Exito)
         {

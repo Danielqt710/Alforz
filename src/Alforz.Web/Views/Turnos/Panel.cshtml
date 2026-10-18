@@ -43,6 +43,7 @@ else
                         <th>Fecha</th>
                         <th>Horario</th>
                         <th>Usuario</th>
+                        <th>Robot</th>
                         <th>Comentario</th>
                         <th>Estado</th>
                         <th class="text-end">Acción</th>
@@ -63,6 +64,17 @@ else
                             <td>
                                 <div class="fw-semibold">@t.NombreUsuario</div>
                                 <div class="small text-body-secondary">@t.Correo</div>
+                            </td>
+                            <td class="small">
+                                @if (t.TieneRobot)
+                                {
+                                    <div class="fw-semibold">@t.RobotNombre</div>
+                                    <div class="text-body-secondary">@FormatoPrecio.Dolares(t.RobotPrecio)</div>
+                                }
+                                else
+                                {
+                                    @:—
+                                }
                             </td>
                             <td class="small">@(string.IsNullOrWhiteSpace(t.Comentario) ? "—" : t.Comentario)</td>
                             <td>

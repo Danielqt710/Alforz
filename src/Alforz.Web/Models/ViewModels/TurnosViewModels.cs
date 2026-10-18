@@ -13,6 +13,9 @@ public class AgendarTurnoViewModel
     public IReadOnlyList<Turno> MisTurnos { get; set; } = [];
     public ProgresoPremio Progreso { get; set; } = new(0, 12);
 
+    /// <summary>Robots activos para elegir, del más barato al más caro.</summary>
+    public IReadOnlyList<Robot> Robots { get; set; } = [];
+
     public DateOnly? DiaAnterior => Dia > DiaMinimo ? Dia.AddDays(-1) : null;
     public DateOnly? DiaSiguiente => Dia < DiaMaximo ? Dia.AddDays(1) : null;
 }

@@ -67,7 +67,7 @@ public interface ITurnoService
     Task<IReadOnlyList<Horario>> HorariosDelDiaAsync(DateOnly dia);
 
     Task<ResultadoTurno> ReservarAsync(
-        string usuarioId, string nombreUsuario, string correo, DateOnly dia, int horaInicio, string? comentario);
+        string usuarioId, string nombreUsuario, string correo, DateOnly dia, int horaInicio, string robotId, string? comentario);
 
     Task<IReadOnlyList<Turno>> TurnosDeUsuarioAsync(string usuarioId);
 

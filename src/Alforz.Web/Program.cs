@@ -10,8 +10,14 @@ using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
+
+// Números con punto decimal en formularios (el input type="number" siempre manda "7.5"),
+// sin importar el idioma del servidor. Los textos para mostrar se arman en Helpers.
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +49,7 @@ builder.Services.AddSingleton<ITokenRepository, FirestoreTokenRepository>();
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<ICuentaService, CuentaService>();
 builder.Services.AddSingleton<ITurnoRepository, FirestoreTurnoRepository>();
+builder.Services.AddSingleton<IRobotRepository, FirestoreRobotRepository>();
 builder.Services.AddScoped<ITurnoService, TurnoService>();
 builder.Services.AddScoped<ValidadorCookie>();
 
@@ -107,11 +114,12 @@ var app = builder.Build();
 try
 {
     await SeedAdmin.EjecutarAsync(app.Services);
+    await SeedRobots.EjecutarAsync(app.Services);
 }
 catch (Exception ex)
 {
     // Un problema de conexión con Firestore no debe impedir que la app levante.
-    app.Logger.LogError(ex, "No se pudo revisar/crear el Admin inicial en Firestore");
+    app.Logger.LogError(ex, "No se pudieron cargar los datos iniciales en Firestore");
 }
 
 app.UseForwardedHeaders();

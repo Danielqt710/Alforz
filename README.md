@@ -85,7 +85,8 @@ Para restringir una página por rol:
 
 ## Turnos
 
-- `/Turnos`: cualquier usuario logueado elige día y horario (turnos de 2 h, de 8 a 18, lunes a viernes)
+- `/Turnos`: cualquier usuario logueado elige día, horario (turnos de 2 h, de 8 a 18, lunes a viernes)
+  y qué robot quiere ver con su precio (se guarda el precio del momento en el turno)
   y recibe la confirmación por correo. Los horarios tomados aparecen como **Ocupado**.
 - `/Turnos/Panel`: solo Admin. Ve todos los turnos (próximos, pasados, cancelados) y puede cancelar
   cualquiera; a quien lo agendó le llega un aviso por correo. En los turnos que ya empezaron marca
@@ -97,6 +98,12 @@ Para restringir una página por rol:
 - `/Turnos/Premios`: solo Admin. Avance de cada usuario y premios por entregar; "Entregar" lo registra.
 - Cada usuario puede tener hasta 3 turnos próximos. Todo se ajusta en la sección `Turnos` de `appsettings.json`
   (los días de atención, en `Turnos:DiasLaborables`, con 0 = domingo ... 6 = sábado).
+
+## Robots
+
+- `/Robots`: solo Admin. Agrega robots, cambia nombre, descripción y precio, y los oculta o muestra.
+- Si la colección `robots` está vacía, al arrancar se cargan las 4 series: Hogar USD 5, Logística USD 8,
+  Médica USD 11 e Industrial USD 14 (de 5 dólares, subiendo 3 por categoría).
 
 ## Publicar en Render
 
