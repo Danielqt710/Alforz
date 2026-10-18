@@ -50,8 +50,10 @@ else
                     {
                         var pasado = Model.Pasados.Contains(t.Id);
                         var (estado, clase) = !t.EstaActivo ? ("Cancelado", "cancelado")
-                                            : pasado ? ("Realizado", "pasado")
-                                            : ("Activo", "activo");
+                                            : !pasado ? ("Activo", "activo")
+                                            : t.Asistio == true ? ("Asistió", "asistio")
+                                            : t.Asistio == false ? ("No asistió", "falto")
+                                            : ("Sin marcar", "pasado");
                         <tr>
                             <td class="text-nowrap">@FormatoTurno.DiaCorto(t.Dia)</td>
                             <td class="text-nowrap">@FormatoTurno.Horario(t.HoraInicio, t.DuracionHoras)</td>
@@ -66,6 +68,10 @@ else
                                 {
                                     <div class="small text-body-secondary">por @t.CanceladoPor</div>
                                 }
+                                else if (t.Asistio is not null && !string.IsNullOrEmpty(t.AsistenciaMarcadaPor))
+                                {
+                                    <div class="small text-body-secondary">por @t.AsistenciaMarcadaPor</div>
+                                }
                             </td>
                             <td class="text-end">
                                 @if (t.EstaActivo && !pasado)
@@ -75,6 +81,20 @@ else
                                         <input type="hidden" name="id" value="@t.Id" />
                                         <input type="hidden" name="filtro" value="@Model.Filtro" />
                                         <button type="submit" class="btn btn-sm btn-alf-secundario"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+                                    </form>
+                                }
+                                else if (t.EstaActivo && pasado)
+                                {
+                                    @* Asistencia: se puede marcar y corregir; el botón de la opción actual queda resaltado. *@
+                                    <form asp-action="MarcarAsistencia" method="post" class="d-inline-flex gap-1">
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <input type="hidden" name="filtro" value="@Model.Filtro" />
+                                        <button type="submit" name="asistio" value="true" title="Asistió"
+                                                class="btn btn-sm @(t.Asistio == true ? "btn-alf-primario" : "btn-outline-secondary")"
+                                                aria-pressed="@(t.Asistio == true ? "true" : "false")"><i class="bi bi-check-lg"></i><span class="d-none d-md-inline ms-1">Asistió</span></button>
+                                        <button type="submit" name="asistio" value="false" title="No asistió"
+                                                class="btn btn-sm @(t.Asistio == false ? "btn-alf-secundario" : "btn-outline-secondary")"
+                                                aria-pressed="@(t.Asistio == false ? "true" : "false")"><i class="bi bi-x-lg"></i><span class="d-none d-md-inline ms-1">No asistió</span></button>
                                     </form>
                                 }
                             </td>

@@ -138,6 +138,26 @@ public class TurnoService(
         return new ResultadoTurno(true, Turno: turno, CorreoEnviado: enviado);
     }
 
+    public async Task<ResultadoTurno> MarcarAsistenciaAsync(string turnoId, bool asistio, string marcadoPor)
+    {
+        var turno = await turnos.ObtenerPorIdAsync(turnoId);
+        if (turno is null)
+            return ResultadoTurno.Falla("Ese turno no existe.");
+
+        if (!turno.EstaActivo)
+            return ResultadoTurno.Falla("No se puede marcar asistencia en un turno cancelado.");
+
+        if (!YaPaso(turno))
+            return ResultadoTurno.Falla("La asistencia se marca cuando el turno ya empezó.");
+
+        turno.Asistio = asistio;
+        turno.AsistenciaMarcadaPor = marcadoPor;
+        turno.FechaAsistencia = DateTime.UtcNow;
+        await turnos.ActualizarAsync(turno);
+        logger.LogInformation("Turno {TurnoId}: asistencia {Asistio} marcada por {Admin}", turno.Id, asistio, marcadoPor);
+        return new ResultadoTurno(true, Turno: turno);
+    }
+
     public bool YaPaso(Turno turno) => turno.Inicio <= Ahora;
 
     private IEnumerable<int> HorasDelDia()

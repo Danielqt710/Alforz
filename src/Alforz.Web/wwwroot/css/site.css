@@ -159,6 +159,8 @@ body { margin-bottom: 64px; }
 .alf-estado-activo    { background: var(--alf-menta); }
 .alf-estado-pasado    { background: #eef1f4; }
 .alf-estado-cancelado { background: var(--alf-lavanda); }
+.alf-estado-asistio   { background: var(--alf-celeste); }
+.alf-estado-falto     { background: color-mix(in srgb, #E8B4BC 70%, white); }
 
 /* ---------- Footer ---------- */
 .footer {

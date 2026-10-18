@@ -89,4 +89,21 @@ public class TurnosController(ITurnoService turnos) : Controller
 
         return RedirectToAction(nameof(Panel), new { filtro });
     }
+
+    [HttpPost]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> MarcarAsistencia(string id, bool asistio, FiltroTurnos filtro = FiltroTurnos.Pasados)
+    {
+        var resultado = await turnos.MarcarAsistenciaAsync(id, asistio, User.Identity?.Name ?? "Admin");
+        if (!resultado.Exito)
+            TempData["Aviso"] = resultado.Error;
+        else
+        {
+            var turno = resultado.Turno!;
+            TempData["Exito"] = $"{turno.NombreUsuario} ({FormatoTurno.DiaCorto(turno.Dia)}): " +
+                (asistio ? "marcado como que asistió." : "marcado como que no asistió.");
+        }
+
+        return RedirectToAction(nameof(Panel), new { filtro });
+    }
 }

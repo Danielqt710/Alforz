@@ -54,6 +54,16 @@ public class Turno
     [FirestoreProperty]
     public string CanceladoPor { get; set; } = string.Empty;
 
+    /// <summary>Si la persona vino al turno: null = todavía sin marcar. Lo marca el Admin.</summary>
+    [FirestoreProperty]
+    public bool? Asistio { get; set; }
+
+    [FirestoreProperty]
+    public string AsistenciaMarcadaPor { get; set; } = string.Empty;
+
+    [FirestoreProperty]
+    public DateTime? FechaAsistencia { get; set; }
+
     public bool EstaActivo => Estado == EstadoTurno.Activo;
 
     public DateOnly Dia => DateOnly.ParseExact(Fecha, "yyyy-MM-dd");

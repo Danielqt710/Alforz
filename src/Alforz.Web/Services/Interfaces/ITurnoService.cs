@@ -50,6 +50,9 @@ public interface ITurnoService
     /// <summary>Cancela un turno activo y avisa por correo a quien lo había agendado.</summary>
     Task<ResultadoTurno> CancelarAsync(string turnoId, string canceladoPor);
 
+    /// <summary>Marca si la persona asistió. Solo para turnos activos que ya empezaron; se puede corregir.</summary>
+    Task<ResultadoTurno> MarcarAsistenciaAsync(string turnoId, bool asistio, string marcadoPor);
+
     /// <summary>Si el turno ya empezó o terminó (según la hora del negocio).</summary>
     bool YaPaso(Turno turno);
 }
