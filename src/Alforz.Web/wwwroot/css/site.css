@@ -85,6 +85,19 @@ body { margin-bottom: 64px; }
 .form-check-input:checked { background-color: var(--alf-celeste-fuerte); border-color: var(--alf-celeste-fuerte); }
 .field-validation-error, .validation-summary-errors { color: #8A3B4A; font-size: .9rem; }
 
+/* Ojo para mostrar u ocultar la clave (lo agrega site.js) */
+.alf-clave { position: relative; }
+.alf-clave > .form-control { padding-right: 3rem; }
+.alf-ver-clave {
+  position: absolute; top: 0; right: 0; z-index: 5;
+  width: 3rem; height: calc(3.5rem + calc(var(--bs-border-width) * 2));
+  display: flex; align-items: center; justify-content: center;
+  border: 0; background: transparent; color: var(--alf-texto);
+  font-size: 1.15rem; opacity: .65; border-radius: var(--bs-border-radius);
+}
+.alf-ver-clave:hover { opacity: 1; }
+.alf-ver-clave:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--alf-celeste) 70%, transparent); }
+
 /* ---------- Portada ---------- */
 .alf-hero {
   background: linear-gradient(135deg, var(--alf-celeste), var(--alf-lavanda) 60%, var(--alf-menta));
