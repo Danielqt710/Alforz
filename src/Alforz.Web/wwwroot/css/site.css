@@ -1,0 +1,104 @@
+/* =========================================================
+   Alforz — paleta de 3 pasteles fríos + gris pizarra para texto
+   ========================================================= */
+:root {
+  --alf-celeste: #BFE3F2;   /* principal */
+  --alf-lavanda: #D6D1F5;   /* secundario */
+  --alf-menta:   #C8EBDD;   /* acentos y éxito */
+  --alf-texto:   #2F3A4A;   /* gris pizarra, solo texto */
+
+  /* Variantes derivadas (mezclas de la misma paleta, no colores nuevos) */
+  --alf-celeste-fuerte: color-mix(in srgb, var(--alf-celeste) 55%, var(--alf-texto));
+  --alf-lavanda-fuerte: color-mix(in srgb, var(--alf-lavanda) 55%, var(--alf-texto));
+  --alf-fondo:          color-mix(in srgb, var(--alf-celeste) 12%, white);
+
+  /* Bootstrap toma estos valores */
+  --bs-body-color: var(--alf-texto);
+  --bs-body-bg: var(--alf-fondo);
+  --bs-link-color: var(--alf-celeste-fuerte);
+  --bs-link-hover-color: var(--alf-texto);
+  --bs-border-radius: .75rem;
+  --bs-body-font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html { font-size: 15px; position: relative; min-height: 100%; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body { margin-bottom: 64px; }
+
+/* ---------- Navbar ---------- */
+.alf-navbar {
+  background: var(--alf-celeste);
+  border-bottom: 1px solid color-mix(in srgb, var(--alf-celeste) 70%, var(--alf-texto));
+}
+.alf-navbar .navbar-brand { font-weight: 800; letter-spacing: .02em; color: var(--alf-texto); }
+.alf-navbar .nav-link { color: var(--alf-texto); }
+.alf-navbar .nav-link:hover { color: var(--alf-texto); opacity: .75; }
+
+/* ---------- Botones ---------- */
+.btn-alf-primario {
+  --bs-btn-color: var(--alf-texto);
+  --bs-btn-bg: var(--alf-celeste);
+  --bs-btn-border-color: var(--alf-celeste);
+  --bs-btn-hover-color: var(--alf-texto);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--alf-celeste) 85%, var(--alf-texto));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--alf-celeste) 85%, var(--alf-texto));
+  --bs-btn-active-bg: color-mix(in srgb, var(--alf-celeste) 75%, var(--alf-texto));
+  --bs-btn-active-color: var(--alf-texto);
+  font-weight: 700;
+}
+.btn-alf-secundario {
+  --bs-btn-color: var(--alf-texto);
+  --bs-btn-bg: var(--alf-lavanda);
+  --bs-btn-border-color: var(--alf-lavanda);
+  --bs-btn-hover-color: var(--alf-texto);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--alf-lavanda) 85%, var(--alf-texto));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--alf-lavanda) 85%, var(--alf-texto));
+  --bs-btn-active-bg: color-mix(in srgb, var(--alf-lavanda) 75%, var(--alf-texto));
+  --bs-btn-active-color: var(--alf-texto);
+  font-weight: 700;
+}
+
+/* ---------- Tarjetas y alertas ---------- */
+.alf-card {
+  background: white;
+  border: 1px solid var(--alf-lavanda);
+  border-radius: 1rem;
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--alf-lavanda) 45%, transparent);
+}
+.alert-alf-exito  { background: var(--alf-menta);   color: var(--alf-texto); border: none; }
+.alert-alf-info   { background: var(--alf-celeste); color: var(--alf-texto); border: none; }
+.alert-alf-aviso  { background: var(--alf-lavanda); color: var(--alf-texto); border: none; }
+
+/* Insignias de rol */
+.badge-rol { color: var(--alf-texto); font-weight: 700; }
+.badge-rol-admin       { background: var(--alf-lavanda); }
+.badge-rol-coordinador { background: var(--alf-celeste); }
+.badge-rol-visita      { background: var(--alf-menta); }
+
+/* ---------- Formularios ---------- */
+.form-control:focus, .form-select:focus, .form-check-input:focus,
+.btn:focus-visible {
+  border-color: var(--alf-celeste-fuerte);
+  box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--alf-celeste) 70%, transparent);
+}
+.form-check-input:checked { background-color: var(--alf-celeste-fuerte); border-color: var(--alf-celeste-fuerte); }
+.field-validation-error, .validation-summary-errors { color: #8A3B4A; font-size: .9rem; }
+
+/* ---------- Portada ---------- */
+.alf-hero {
+  background: linear-gradient(135deg, var(--alf-celeste), var(--alf-lavanda) 60%, var(--alf-menta));
+  border-radius: 1.25rem;
+  padding: 3rem 1.5rem;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  position: absolute; bottom: 0; width: 100%;
+  line-height: 56px; white-space: nowrap;
+  background: var(--alf-lavanda);
+  color: var(--alf-texto);
+}
+
+.form-floating > .form-control::placeholder { color: var(--bs-secondary-color); text-align: end; }
+.form-floating > .form-control:focus::placeholder { text-align: start; }
