@@ -1,0 +1,27 @@
+@model OlvideClaveViewModel
+@{
+    ViewData["Title"] = "Recuperar clave";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="alf-card p-4">
+            <h1 class="h3 mb-1"><i class="bi bi-key me-2"></i>Recuperar clave</h1>
+            <p class="text-body-secondary mb-4">Te enviaremos un código a tu correo para crear una clave nueva.</p>
+            <form asp-action="OlvideClave" method="post">
+                <div asp-validation-summary="ModelOnly" class="mb-3"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Correo" class="form-control" autocomplete="email" placeholder="correo" autofocus />
+                    <label asp-for="Correo"></label>
+                    <span asp-validation-for="Correo"></span>
+                </div>
+                <button type="submit" class="btn btn-alf-primario w-100">Enviar código</button>
+            </form>
+            <p class="text-center mt-3 mb-0"><a asp-action="Ingresar">Volver a ingresar</a></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,30 @@
+@using System.Security.Claims
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var rol = User.FindFirstValue(ClaimTypes.Role) ?? Roles.Visita;
+    <ul class="navbar-nav align-items-sm-center gap-sm-2">
+        <li class="nav-item">
+            <span class="navbar-text">
+                <i class="bi bi-person-circle me-1"></i>@User.Identity.Name
+                <span class="badge rounded-pill badge-rol badge-rol-@rol.ToLowerInvariant() ms-1">@rol</span>
+            </span>
+        </li>
+        <li class="nav-item">
+            <form asp-controller="Cuenta" asp-action="Salir" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-alf-secundario"><i class="bi bi-box-arrow-right me-1"></i>Salir</button>
+            </form>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav gap-sm-2">
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Cuenta" asp-action="Ingresar">Ingresar</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-sm btn-alf-secundario mt-1" asp-controller="Cuenta" asp-action="Registrar">Registrarse</a>
+        </li>
+    </ul>
+}

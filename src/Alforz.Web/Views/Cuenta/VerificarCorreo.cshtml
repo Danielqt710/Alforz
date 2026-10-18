@@ -1,0 +1,35 @@
+@model VerificarCorreoViewModel
+@{
+    ViewData["Title"] = "Verificar correo";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="alf-card p-4">
+            <h1 class="h3 mb-1"><i class="bi bi-envelope-check me-2"></i>Verificar correo</h1>
+            <p class="text-body-secondary mb-4">Escribe el código de 6 dígitos que te enviamos. Revisa también la carpeta de spam.</p>
+            <form asp-action="VerificarCorreo" method="post">
+                <div asp-validation-summary="ModelOnly" class="mb-3"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Correo" class="form-control" autocomplete="email" placeholder="correo" />
+                    <label asp-for="Correo"></label>
+                    <span asp-validation-for="Correo"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Codigo" class="form-control" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" autofocus />
+                    <label asp-for="Codigo"></label>
+                    <span asp-validation-for="Codigo"></span>
+                </div>
+                <button type="submit" class="btn btn-alf-primario w-100">Verificar</button>
+            </form>
+            <form asp-action="ReenviarCodigo" method="post" class="text-center mt-3">
+                <input type="hidden" name="correo" value="@Model.Correo" />
+                <button type="submit" class="btn btn-link p-0">Enviarme otro código</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

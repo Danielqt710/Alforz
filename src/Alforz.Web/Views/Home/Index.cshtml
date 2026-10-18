@@ -4,7 +4,16 @@
 
 <section class="alf-hero text-center mb-4">
     <h1 class="display-5 fw-bold">Alforz</h1>
-    <p class="lead mb-4">Base del proyecto lista. El próximo paso es el login con roles.</p>
+    <p class="lead mb-4">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            @:Hola, @User.Identity.Name.
+        }
+        else
+        {
+            <a asp-controller="Cuenta" asp-action="Ingresar">Ingresa</a> @:o <a asp-controller="Cuenta" asp-action="Registrar">crea tu cuenta</a>.
+        }
+    </p>
     <div class="d-flex gap-2 justify-content-center flex-wrap">
         <span class="badge rounded-pill badge-rol badge-rol-admin px-3 py-2">Admin</span>
         <span class="badge rounded-pill badge-rol badge-rol-coordinador px-3 py-2">Coordinador</span>

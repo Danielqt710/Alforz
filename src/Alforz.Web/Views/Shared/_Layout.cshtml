@@ -28,8 +28,14 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
+                        @if (User.IsInRole(Roles.Admin))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                            </li>
+                        }
                     </ul>
-                    @* El menú de usuario (Ingresar / Registrarse / Salir) se agrega en el paso del login *@
+                    <partial name="_MenuUsuario" />
                 </div>
             </div>
         </nav>

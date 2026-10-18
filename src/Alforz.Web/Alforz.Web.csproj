@@ -7,4 +7,10 @@
     <UserSecretsId>e2b47291-ad8d-45db-8b1a-2466bd81d435</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Google.Cloud.Firestore" Version="4.5.0" />
+    <PackageReference Include="MailKit" Version="4.18.1" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+  </ItemGroup>
+
 </Project>

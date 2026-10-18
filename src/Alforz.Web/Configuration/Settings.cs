@@ -9,6 +9,8 @@ public class FirebaseSettings
 
     /// <summary>Ruta local al JSON de la cuenta de servicio.</summary>
     public string CredentialsPath { get; set; } = string.Empty;
+
+    public bool EstaConfigurado => !string.IsNullOrWhiteSpace(ProjectId);
 }
 
 /// <summary>Sección "Email" de appsettings (Brevo por SMTP). Usuario y clave van en user-secrets.</summary>
@@ -22,6 +24,11 @@ public class EmailSettings
     public string SmtpPassword { get; set; } = string.Empty;
     public string FromAddress { get; set; } = string.Empty;
     public string FromName { get; set; } = "Alforz";
+
+    public bool EstaConfigurado =>
+        !string.IsNullOrWhiteSpace(SmtpUser) &&
+        !string.IsNullOrWhiteSpace(SmtpPassword) &&
+        !string.IsNullOrWhiteSpace(FromAddress);
 }
 
 /// <summary>Sección "Seguridad": bloqueos y vencimientos.</summary>
@@ -33,4 +40,20 @@ public class SeguridadSettings
     public int MinutosBloqueo { get; set; } = 15;
     public int MinutosValidezToken { get; set; } = 15;
     public int MaxIntentosToken { get; set; } = 5;
+
+    /// <summary>Espera mínima antes de poder pedir otro código por correo.</summary>
+    public int SegundosEntreReenvios { get; set; } = 60;
+}
+
+/// <summary>
+/// Sección "AdminInicial": datos del primer Admin que se crea al arrancar si no hay ninguno.
+/// La clave va en user-secrets; después de crearlo se puede borrar.
+/// </summary>
+public class AdminInicialSettings
+{
+    public const string Seccion = "AdminInicial";
+
+    public string NombreUsuario { get; set; } = "admin";
+    public string Correo { get; set; } = string.Empty;
+    public string Clave { get; set; } = string.Empty;
 }
