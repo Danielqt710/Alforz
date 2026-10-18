@@ -37,7 +37,7 @@
         <div class="col-6 col-md-2">
             <label for="cantidad" class="form-label small mb-1">Revisar</label>
             <select id="cantidad" name="cantidad" class="form-select" onchange="this.form.submit()">
-                @foreach (var n in new[] { 100, 300, 1000 })
+                @foreach (var n in new[] { 30, 100, 300, 1000 })
                 {
                     <option value="@n" selected="@(n == Model.Cantidad)">últimos @n</option>
                 }

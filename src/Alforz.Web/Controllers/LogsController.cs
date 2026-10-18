@@ -19,13 +19,13 @@ public class LogsController(
     IOptions<TurnosSettings> turnos,
     IOptions<LogsSettings> logs) : Controller
 {
-    private static readonly int[] CantidadesPermitidas = [100, 300, 1000];
+    private static readonly int[] CantidadesPermitidas = [30, 100, 300, 1000];
 
     [HttpGet]
-    public async Task<IActionResult> Index(string? nivel = null, string? buscar = null, int cantidad = 300)
+    public async Task<IActionResult> Index(string? nivel = null, string? buscar = null, int cantidad = 30)
     {
         if (!CantidadesPermitidas.Contains(cantidad))
-            cantidad = 300;
+            cantidad = 30;
 
         // Solo se ordena por fecha (índice simple, sin índices compuestos); el filtro se hace en memoria.
         var snapshot = await firestore.Db.Collection(EscritorLogsFirestore.Coleccion)
