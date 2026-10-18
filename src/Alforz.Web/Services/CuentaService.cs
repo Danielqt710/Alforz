@@ -152,9 +152,13 @@ public class CuentaService(
     {
         var usuario = await usuarios.ObtenerPorCorreoAsync(correoUsuario);
         if (usuario is null || !usuario.Activo)
+        {
+            logger.LogInformation("Recuperación pedida para un correo sin cuenta activa");
             return;
+        }
 
-        await EnviarCodigoAsync(usuario, TipoToken.RecuperacionClave);
+        if (!await EnviarCodigoAsync(usuario, TipoToken.RecuperacionClave))
+            logger.LogInformation("Recuperación de {UsuarioId}: ya se envió un código hace muy poco", usuario.Id);
     }
 
     public async Task<Resultado> RestablecerClaveAsync(string correoUsuario, string codigo, string nuevaClave)

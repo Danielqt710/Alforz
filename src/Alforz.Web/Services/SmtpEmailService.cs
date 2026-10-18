@@ -39,7 +39,8 @@ public class SmtpEmailService(
         using var cliente = new SmtpClient();
         await cliente.ConnectAsync(_config.SmtpHost, _config.SmtpPort, SecureSocketOptions.StartTls);
         await cliente.AuthenticateAsync(_config.SmtpUser, _config.SmtpPassword);
-        await cliente.SendAsync(mensaje);
+        var respuesta = await cliente.SendAsync(mensaje);
         await cliente.DisconnectAsync(true);
+        logger.LogInformation("Correo \"{Asunto}\" enviado a {Destinatario}. SMTP: {Respuesta}", asunto, destinatario, respuesta);
     }
 }
