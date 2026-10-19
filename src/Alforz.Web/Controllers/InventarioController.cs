@@ -42,7 +42,7 @@ public class InventarioController(IRobotRepository robots, ILogger<InventarioCon
             return NotFound();
 
         var imagen = await robots.ObtenerImagenAsync(id);
-        return imagen is null ? NotFound() : File(imagen.Datos.ToByteArray(), imagen.TipoContenido);
+        return imagen is null ? NotFound() : File(imagen.Datos.ByteString.ToByteArray(), imagen.TipoContenido);
     }
 
     [HttpGet]
