@@ -2,7 +2,10 @@ using Google.Cloud.Firestore;
 
 namespace Alforz.Web.Models.Entities;
 
-/// <summary>Robot del catálogo (colección "robots") que se puede elegir al agendar un turno.</summary>
+/// <summary>
+/// Robot del inventario (colección "robots"). Se puede elegir al agendar un turno.
+/// La foto se guarda aparte, en la colección "imagenesRobots", con el mismo id.
+/// </summary>
 [FirestoreData]
 public class Robot
 {
@@ -19,10 +22,23 @@ public class Robot
     [FirestoreProperty]
     public double Precio { get; set; }
 
-    /// <summary>Si se ofrece al agendar. Los robots no se borran: se ocultan.</summary>
+    /// <summary>Unidades disponibles en el inventario.</summary>
+    [FirestoreProperty]
+    public int Cantidad { get; set; }
+
+    /// <summary>
+    /// Cambia cada vez que se sube una foto nueva (sirve para que el navegador no muestre la vieja).
+    /// Vacío = el robot no tiene foto.
+    /// </summary>
+    [FirestoreProperty]
+    public string ImagenVersion { get; set; } = string.Empty;
+
+    /// <summary>Si se ofrece al agendar y se ve en el inventario. Los robots no se borran: se ocultan.</summary>
     [FirestoreProperty]
     public bool Activo { get; set; } = true;
 
     [FirestoreProperty]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+
+    public bool TieneImagen => !string.IsNullOrEmpty(ImagenVersion);
 }

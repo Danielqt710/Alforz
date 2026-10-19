@@ -7,8 +7,10 @@ namespace Alforz.Web.Repositories;
 public class FirestoreRobotRepository(FirestoreProveedor firestore) : IRobotRepository
 {
     public const string Coleccion = "robots";
+    public const string ColeccionImagenes = "imagenesRobots";
 
     private CollectionReference Robots => firestore.Db.Collection(Coleccion);
+    private CollectionReference Imagenes => firestore.Db.Collection(ColeccionImagenes);
 
     public async Task<Robot?> ObtenerPorIdAsync(string id)
     {
@@ -39,4 +41,23 @@ public class FirestoreRobotRepository(FirestoreProveedor firestore) : IRobotRepo
     }
 
     public Task ActualizarAsync(Robot robot) => Robots.Document(robot.Id).SetAsync(robot);
+
+    public async Task<ImagenRobot?> ObtenerImagenAsync(string robotId)
+    {
+        if (string.IsNullOrWhiteSpace(robotId))
+            return null;
+
+        var snapshot = await Imagenes.Document(robotId).GetSnapshotAsync();
+        return snapshot.Exists ? snapshot.ConvertTo<ImagenRobot>() : null;
+    }
+
+    public Task GuardarImagenAsync(string robotId, byte[] datos, string tipoContenido) =>
+        Imagenes.Document(robotId).SetAsync(new ImagenRobot
+        {
+            Datos = Blob.CopyFrom(datos),
+            TipoContenido = tipoContenido,
+            FechaSubida = DateTime.UtcNow
+        });
+
+    public Task BorrarImagenAsync(string robotId) => Imagenes.Document(robotId).DeleteAsync();
 }

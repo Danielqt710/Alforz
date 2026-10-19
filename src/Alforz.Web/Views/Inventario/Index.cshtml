@@ -1,0 +1,94 @@
+@using Alforz.Web.Helpers
+@model InventarioViewModel
+@{
+    ViewData["Title"] = "Inventario";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-box-seam me-2"></i>Inventario</h1>
+    @if (Model.PuedeEditar)
+    {
+        <a asp-action="Nuevo" class="btn btn-alf-primario"><i class="bi bi-plus-lg me-1"></i>Agregar robot</a>
+    }
+</div>
+
+@if (Model.Robots.Count == 0)
+{
+    <div class="alf-card p-4 text-center text-body-secondary">
+        <i class="bi bi-robot d-block fs-1 mb-2"></i>
+        @(Model.PuedeEditar ? "Todavía no hay robots. Agrega el primero." : "Todavía no hay robots en el inventario.")
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var r in Model.Robots)
+        {
+            <div class="col">
+                <article class="alf-card alf-inv-card h-100 overflow-hidden d-flex flex-column @(r.Activo ? "" : "alf-inv-oculto")">
+                    @if (r.TieneImagen)
+                    {
+                        <img src="@Url.Action("Imagen", new { id = r.Id, v = r.ImagenVersion })"
+                             alt="Foto de @r.Nombre" class="alf-inv-img" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="alf-inv-img alf-inv-sin-imagen" aria-hidden="true"><i class="bi bi-robot"></i></div>
+                    }
+
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                            <h2 class="h6 fw-bold mb-0">@r.Nombre</h2>
+                            <span class="fw-bold text-nowrap">@FormatoPrecio.Dolares(r.Precio)</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(r.Descripcion))
+                        {
+                            <p class="small text-body-secondary mb-2">@r.Descripcion</p>
+                        }
+
+                        <div class="mt-auto d-flex flex-wrap gap-1">
+                            @if (r.Cantidad > 0)
+                            {
+                                <span class="badge rounded-pill alf-inv-stock">@r.Cantidad @(r.Cantidad == 1 ? "disponible" : "disponibles")</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill alf-inv-sin-stock">Sin stock</span>
+                            }
+                            @if (!r.Activo)
+                            {
+                                <span class="badge rounded-pill alf-estado-turno alf-estado-cancelado">Oculto</span>
+                            }
+                        </div>
+
+                        @if (Model.PuedeEditar)
+                        {
+                            <div class="d-flex gap-1 mt-3">
+                                <a asp-action="Editar" asp-route-id="@r.Id" class="btn btn-sm btn-alf-primario flex-fill">
+                                    <i class="bi bi-pencil me-1"></i>Editar
+                                </a>
+                                @if (Model.EsAdmin)
+                                {
+                                    <form asp-action="CambiarEstado" method="post" class="flex-fill d-flex">
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <button type="submit" class="btn btn-sm btn-alf-secundario flex-fill">
+                                            <i class="bi @(r.Activo ? "bi-eye-slash" : "bi-eye") me-1"></i>@(r.Activo ? "Ocultar" : "Mostrar")
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+
+    @if (Model.PuedeEditar)
+    {
+        <p class="form-text mt-3">
+            Los robots ocultos no los ven las visitas ni aparecen al agendar.
+            Cambiar un precio no afecta los turnos ya agendados.
+        </p>
+    }
+}

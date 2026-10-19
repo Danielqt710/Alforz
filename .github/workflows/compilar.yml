@@ -1,0 +1,16 @@
+# Compila la app en cada push, para enterarse de errores antes de que lleguen a Render.
+name: Compilar
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet build src/Alforz.Web/Alforz.Web.csproj -c Release -warnaserror:CS8602,CS8604
