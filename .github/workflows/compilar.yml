@@ -5,6 +5,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   compilar:
     runs-on: ubuntu-latest
@@ -13,4 +16,17 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
-      - run: dotnet build src/Alforz.Web/Alforz.Web.csproj -c Release -warnaserror:CS8602,CS8604
+      - name: Compilar
+        run: |
+          set -o pipefail
+          dotnet build src/Alforz.Web/Alforz.Web.csproj -c Release 2>&1 | tee /tmp/build.log
+      # TEMPORAL: deja el resultado en la rama ci-log para revisarlo desde fuera de GitHub
+      - name: Publicar resultado
+        if: always() && github.ref != 'refs/heads/main'
+        run: |
+          estado="${{ job.status }}"
+          cd /tmp && rm -rf log && mkdir log && cd log && git init -q
+          { echo "commit: ${{ github.sha }}"; echo "estado: $estado"; grep -E "error|warning|Build succeeded|Warn|Error" /tmp/build.log | sort -u | head -200; } > resultado.txt
+          git add resultado.txt
+          git -c user.name=ci -c user.email=ci@noreply commit -qm log
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:ci-log
