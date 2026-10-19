@@ -1,0 +1,90 @@
+@model RobotFormViewModel
+@{
+    ViewData["Title"] = Model.EsNuevo ? "Agregar robot" : "Editar robot";
+    var accion = Model.EsNuevo ? "Nuevo" : "Editar";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
+        <div class="alf-card p-4">
+            <h1 class="h4 mb-3">
+                <i class="bi @(Model.EsNuevo ? "bi-plus-circle" : "bi-pencil-square") me-2"></i>@ViewData["Title"]
+            </h1>
+
+            <form asp-action="@accion" method="post" enctype="multipart/form-data">
+                @if (!Model.EsNuevo)
+                {
+                    <input type="hidden" asp-for="Id" />
+                }
+                <div asp-validation-summary="ModelOnly" class="mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Imagen" class="form-label fw-semibold"></label>
+                    <div class="alf-inv-preview mb-2">
+                        @if (!Model.EsNuevo && !string.IsNullOrEmpty(Model.ImagenVersion))
+                        {
+                            <img id="vista-previa" src="@Url.Action("Imagen", new { id = Model.Id, v = Model.ImagenVersion })" alt="Foto actual" />
+                        }
+                        else
+                        {
+                            <img id="vista-previa" alt="Vista previa" hidden />
+                            <div id="sin-foto" class="alf-inv-sin-imagen"><i class="bi bi-image"></i></div>
+                        }
+                    </div>
+                    <input asp-for="Imagen" type="file" accept="image/*" class="form-control" data-achicar-imagen />
+                    <div class="form-text" id="estado-foto">JPG, PNG o WebP. Se achica sola antes de subirse.</div>
+                    <span asp-validation-for="Imagen"></span>
+
+                    @if (!Model.EsNuevo && !string.IsNullOrEmpty(Model.ImagenVersion))
+                    {
+                        <div class="form-check mt-2">
+                            <input asp-for="QuitarImagen" class="form-check-input" />
+                            <label asp-for="QuitarImagen" class="form-check-label"></label>
+                        </div>
+                    }
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Nombre" class="form-control" placeholder="nombre" />
+                    <label asp-for="Nombre"></label>
+                    <span asp-validation-for="Nombre"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Descripcion" class="form-control" placeholder="descripción" style="height: 5rem"></textarea>
+                    <label asp-for="Descripcion"></label>
+                    <span asp-validation-for="Descripcion"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <div class="form-floating">
+                            <input asp-for="Precio" type="number" min="0.01" step="0.01" inputmode="decimal" class="form-control" placeholder="precio" />
+                            <label asp-for="Precio"></label>
+                            <span asp-validation-for="Precio"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-floating">
+                            <input asp-for="Cantidad" type="number" min="0" step="1" inputmode="numeric" class="form-control" placeholder="cantidad" />
+                            <label asp-for="Cantidad"></label>
+                            <span asp-validation-for="Cantidad"></span>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!Model.EsNuevo)
+                {
+                    <p class="form-text">Los turnos ya agendados conservan el precio que tenían al agendarse.</p>
+                }
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-alf-secundario flex-fill">Cancelar</a>
+                    <button type="submit" class="btn btn-alf-primario flex-fill"><i class="bi bi-check-lg me-1"></i>Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/imagen-robot.js" asp-append-version="true"></script>
+}

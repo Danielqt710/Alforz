@@ -99,9 +99,18 @@ Para restringir una página por rol:
 - Cada usuario puede tener hasta 3 turnos próximos. Todo se ajusta en la sección `Turnos` de `appsettings.json`
   (los días de atención, en `Turnos:DiasLaborables`, con 0 = domingo ... 6 = sábado).
 
-## Robots
+## Inventario (robots)
 
-- `/Robots`: solo Admin. Agrega robots, cambia nombre, descripción y precio, y los oculta o muestra.
+- `/Inventario`: cualquier usuario logueado ve los robots con su foto, precio y cuántos hay.
+- **Admin y Coordinador** agregan robots y editan nombre, descripción, precio, cantidad y foto.
+  Ven también los ocultos. **Solo Admin** los oculta o muestra (los ocultos no los ven las visitas
+  ni aparecen al agendar). `/Robots` redirige acá.
+- Fotos: el navegador las achica antes de subirlas (lado mayor 1200 px, JPEG, ~200 KB). Se guardan en
+  Firestore, en la colección `imagenesRobots` (un documento por robot, con el mismo id), porque un
+  documento admite hasta 1 MB y así no hace falta Firebase Storage (que pide el plan pago).
+  El servidor acepta solo JPG, PNG o WebP de hasta 900 KB y revisa el contenido real del archivo.
+- La foto se sirve en `/Inventario/Imagen/{id}?v=...`; el navegador la guarda un mes y, como cada foto
+  nueva cambia la `v`, nunca se ve una vieja.
 - Si la colección `robots` está vacía, al arrancar se cargan las 4 series: Hogar USD 5, Logística USD 8,
   Médica USD 11 e Industrial USD 14 (de 5 dólares, subiendo 3 por categoría).
 

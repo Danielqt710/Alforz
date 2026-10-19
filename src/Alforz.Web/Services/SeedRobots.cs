@@ -8,7 +8,7 @@ namespace Alforz.Web.Services;
 /// <summary>
 /// Al arrancar, si el catálogo está vacío, carga las 4 series de Alforz:
 /// la más barata a 5 dólares y cada categoría siguiente 3 dólares más.
-/// Después el Admin las cambia desde la sección Robots.
+/// Después se cambian (y se les pone foto) desde la sección Inventario.
 /// </summary>
 public static class SeedRobots
 {

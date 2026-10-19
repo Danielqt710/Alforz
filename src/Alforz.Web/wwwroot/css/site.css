@@ -220,3 +220,32 @@ body { margin-bottom: 64px; }
 
 .form-floating > .form-control::placeholder { color: var(--bs-secondary-color); text-align: end; }
 .form-floating > .form-control:focus::placeholder { text-align: start; }
+
+/* ---------- Inventario ---------- */
+.alf-inv-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--alf-fondo);
+}
+.alf-inv-sin-imagen {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, var(--alf-celeste), var(--alf-lavanda));
+  color: var(--alf-texto); font-size: 3rem; opacity: .85;
+}
+.alf-inv-card { transition: transform .15s ease, box-shadow .15s ease; }
+.alf-inv-card:hover { transform: translateY(-2px); }
+.alf-inv-oculto { opacity: .55; }
+.alf-inv-stock     { background: var(--alf-menta);   color: var(--alf-texto); font-weight: 700; }
+.alf-inv-sin-stock { background: var(--alf-lavanda); color: var(--alf-texto); font-weight: 700; }
+.alf-inv-preview {
+  max-width: 320px;
+  border-radius: .75rem;
+  overflow: hidden;
+  border: 1px solid var(--alf-lavanda);
+}
+.alf-inv-preview img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.alf-inv-preview [hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .alf-inv-card { transition: none; } .alf-inv-card:hover { transform: none; } }
