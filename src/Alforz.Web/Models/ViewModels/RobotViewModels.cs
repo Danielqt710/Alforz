@@ -60,3 +60,14 @@ public class InventarioViewModel
     /// <summary>Solo Admin oculta o muestra robots.</summary>
     public bool EsAdmin { get; set; }
 }
+
+/// <summary>Historial de cantidad y precio de un robot.</summary>
+public class HistorialStockViewModel
+{
+    public Robot Robot { get; set; } = new();
+    public IReadOnlyList<MovimientoStock> Movimientos { get; set; } = [];
+    public TimeZoneInfo Zona { get; set; } = TimeZoneInfo.Utc;
+
+    public DateTime HoraLocal(DateTime utc) =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), Zona);
+}

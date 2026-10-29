@@ -240,6 +240,10 @@ body { margin-bottom: 64px; }
 .alf-inv-oculto { opacity: .55; }
 .alf-inv-stock     { background: var(--alf-menta);   color: var(--alf-texto); font-weight: 700; }
 .alf-inv-sin-stock { background: var(--alf-lavanda); color: var(--alf-texto); font-weight: 700; }
+
+/* ---------- Historial de stock ---------- */
+.alf-mov-alta   { border-left-color: var(--alf-menta); }
+.alf-mov-precio { background: var(--alf-celeste); color: var(--alf-texto); font-weight: 700; }
 .alf-inv-preview {
   max-width: 320px;
   border-radius: .75rem;
