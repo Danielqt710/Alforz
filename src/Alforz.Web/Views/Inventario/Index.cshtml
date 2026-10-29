@@ -67,6 +67,10 @@ else
                                 <a asp-action="Editar" asp-route-id="@r.Id" class="btn btn-sm btn-alf-primario flex-fill">
                                     <i class="bi bi-pencil me-1"></i>Editar
                                 </a>
+                                <a asp-action="Historial" asp-route-id="@r.Id" class="btn btn-sm btn-alf-secundario"
+                                   title="Historial de cantidad y precio" aria-label="Historial de @r.Nombre">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
                                 @if (Model.EsAdmin)
                                 {
                                     <form asp-action="CambiarEstado" method="post" class="flex-fill d-flex">

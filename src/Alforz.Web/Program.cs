@@ -53,6 +53,7 @@ builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<ICuentaService, CuentaService>();
 builder.Services.AddSingleton<ITurnoRepository, FirestoreTurnoRepository>();
 builder.Services.AddSingleton<IRobotRepository, FirestoreRobotRepository>();
+builder.Services.AddSingleton<IMovimientoStockRepository, FirestoreMovimientoStockRepository>();
 builder.Services.AddScoped<ITurnoService, TurnoService>();
 builder.Services.AddScoped<ValidadorCookie>();
 

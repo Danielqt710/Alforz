@@ -111,6 +111,10 @@ Para restringir una página por rol:
   El servidor acepta solo JPG, PNG o WebP de hasta 900 KB y revisa el contenido real del archivo.
 - La foto se sirve en `/Inventario/Imagen/{id}?v=...`; el navegador la guarda un mes y, como cada foto
   nueva cambia la `v`, nunca se ve una vieja.
+- **Historial** (`/Inventario/Historial/{id}`, Admin y Coordinador): cada robot guarda quién cambió su cantidad
+  o su precio y cuándo, con el valor anterior y el nuevo, además del alta. Se guarda en la colección
+  `movimientosStock`; cambiar solo el nombre, la descripción o la foto no deja registro.
+  Los robots que ya existían empiezan con el historial vacío.
 - Si la colección `robots` está vacía, al arrancar se cargan las 4 series: Hogar USD 5, Logística USD 8,
   Médica USD 11 e Industrial USD 14 (de 5 dólares, subiendo 3 por categoría).
 

@@ -1,3 +1,4 @@
+using Alforz.Web.Configuration;
 using Alforz.Web.Helpers;
 using Alforz.Web.Models;
 using Alforz.Web.Models.Entities;
@@ -5,15 +6,20 @@ using Alforz.Web.Models.ViewModels;
 using Alforz.Web.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Alforz.Web.Controllers;
 
 /// <summary>
 /// Inventario de robots con foto.
-/// Cualquier usuario logueado lo ve; Admin y Coordinador agregan y editan; solo Admin oculta o muestra.
+/// Cualquier usuario logueado lo ve; Admin y Coordinador agregan, editan y ven el historial; solo Admin oculta o muestra.
 /// </summary>
 [Authorize]
-public class InventarioController(IRobotRepository robots, ILogger<InventarioController> logger) : Controller
+public class InventarioController(
+    IRobotRepository robots,
+    IMovimientoStockRepository movimientos,
+    IOptions<TurnosSettings> turnos,
+    ILogger<InventarioController> logger) : Controller
 {
     private bool PuedeEditar => User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Coordinador);
 
@@ -68,6 +74,7 @@ public class InventarioController(IRobotRepository robots, ILogger<InventarioCon
             Cantidad = modelo.Cantidad!.Value
         };
         await robots.CrearAsync(robot);
+        await RegistrarMovimientoAsync(robot, MovimientoStock.TipoAlta, cantidadAnterior: 0, precioAnterior: 0);
 
         if (imagen is not null)
         {
@@ -108,6 +115,9 @@ public class InventarioController(IRobotRepository robots, ILogger<InventarioCon
             return View("Formulario", modelo);
         }
 
+        var cantidadAnterior = robot.Cantidad;
+        var precioAnterior = robot.Precio;
+
         robot.Nombre = modelo.Nombre.Trim();
         robot.Descripcion = modelo.Descripcion?.Trim() ?? string.Empty;
         robot.Precio = Redondear(modelo.Precio!.Value);
@@ -125,11 +135,31 @@ public class InventarioController(IRobotRepository robots, ILogger<InventarioCon
         }
 
         await robots.ActualizarAsync(robot);
+        if (robot.Cantidad != cantidadAnterior || robot.Precio != precioAnterior)
+            await RegistrarMovimientoAsync(robot, MovimientoStock.TipoCambio, cantidadAnterior, precioAnterior);
+
         logger.LogInformation("{Usuario} editó el robot {RobotId} ({Nombre}, {Precio}, {Cantidad} u., foto: {TieneFoto})",
             User.Identity?.Name, robot.Id, robot.Nombre, robot.Precio, robot.Cantidad, robot.TieneImagen);
 
         TempData["Exito"] = $"Robot \"{robot.Nombre}\" actualizado. Los turnos ya agendados conservan el precio que tenían.";
         return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>Cambios de cantidad y precio de un robot, del más nuevo al más viejo.</summary>
+    [HttpGet]
+    [Authorize(Roles = Roles.PuedenCrear)]
+    public async Task<IActionResult> Historial(string id)
+    {
+        var robot = await robots.ObtenerPorIdAsync(id);
+        if (robot is null)
+            return NotFound();
+
+        return View(new HistorialStockViewModel
+        {
+            Robot = robot,
+            Movimientos = await movimientos.ListarPorRobotAsync(robot.Id),
+            Zona = ZonaHoraria.Buscar(turnos.Value.ZonaHoraria)
+        });
     }
 
     [HttpPost]
@@ -179,6 +209,32 @@ public class InventarioController(IRobotRepository robots, ILogger<InventarioCon
         }
 
         return (datos, tipo);
+    }
+
+    /// <summary>
+    /// Guarda el cambio en el historial. Si falla, solo se registra el error: el robot ya quedó guardado
+    /// y no tiene sentido mostrarle un error a quien lo editó.
+    /// </summary>
+    private async Task RegistrarMovimientoAsync(Robot robot, string tipo, int cantidadAnterior, double precioAnterior)
+    {
+        try
+        {
+            await movimientos.RegistrarAsync(new MovimientoStock
+            {
+                RobotId = robot.Id,
+                RobotNombre = robot.Nombre,
+                Usuario = User.Identity?.Name ?? string.Empty,
+                Tipo = tipo,
+                CantidadAnterior = cantidadAnterior,
+                CantidadNueva = robot.Cantidad,
+                PrecioAnterior = precioAnterior,
+                PrecioNuevo = robot.Precio
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "No se pudo guardar el historial del robot {RobotId}", robot.Id);
+        }
     }
 
     private static double Redondear(decimal precio) => (double)Math.Round(precio, 2);

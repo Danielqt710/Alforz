@@ -1,0 +1,65 @@
+@using Alforz.Web.Helpers
+@model HistorialStockViewModel
+@{
+    ViewData["Title"] = $"Historial de {Model.Robot.Nombre}";
+}
+
+<a asp-action="Index" class="d-inline-block small mb-2"><i class="bi bi-arrow-left me-1"></i>Volver al inventario</a>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-clock-history me-2"></i>Historial de @Model.Robot.Nombre</h1>
+    <div class="d-flex flex-wrap gap-1">
+        <span class="badge rounded-pill @(Model.Robot.Cantidad > 0 ? "alf-inv-stock" : "alf-inv-sin-stock")">
+            Hoy: @Model.Robot.Cantidad @(Model.Robot.Cantidad == 1 ? "unidad" : "unidades")
+        </span>
+        <span class="badge rounded-pill alf-mov-precio">@FormatoPrecio.Dolares(Model.Robot.Precio)</span>
+    </div>
+</div>
+
+@if (Model.Movimientos.Count == 0)
+{
+    <div class="alf-card p-4 text-center text-body-secondary">
+        <i class="bi bi-clock-history d-block fs-1 mb-2"></i>
+        Todavía no hay cambios registrados. El historial cuenta desde que se agregó esta sección.
+    </div>
+}
+else
+{
+    <div class="d-grid gap-2">
+        @foreach (var m in Model.Movimientos)
+        {
+            <div class="alf-log @(m.EsAlta ? "alf-mov-alta" : "")">
+                <div class="d-flex flex-wrap align-items-center gap-2 small mb-1">
+                    <span class="badge rounded-pill @(m.EsAlta ? "alf-inv-stock" : "alf-log-nivel")">
+                        <i class="bi @(m.EsAlta ? "bi-plus-lg" : "bi-pencil") me-1"></i>@(m.EsAlta ? "Alta" : "Cambio")
+                    </span>
+                    <span class="fw-semibold">@Model.HoraLocal(m.Fecha).ToString("dd/MM/yyyy HH:mm")</span>
+                    <span class="text-body-secondary"><i class="bi bi-person me-1"></i>@m.Usuario</span>
+                </div>
+
+                @if (m.EsAlta)
+                {
+                    <div>Se agregó con @m.CantidadNueva @(m.CantidadNueva == 1 ? "unidad" : "unidades") a @FormatoPrecio.Dolares(m.PrecioNuevo).</div>
+                }
+                @if (m.CambioCantidad)
+                {
+                    var sube = m.DiferenciaCantidad > 0;
+                    <div>
+                        Cantidad: @m.CantidadAnterior → <strong>@m.CantidadNueva</strong>
+                        <span class="badge rounded-pill @(sube ? "alf-inv-stock" : "alf-inv-sin-stock") ms-1">
+                            @(sube ? "+" : "")@m.DiferenciaCantidad
+                        </span>
+                    </div>
+                }
+                @if (m.CambioPrecio)
+                {
+                    <div>Precio: @FormatoPrecio.Dolares(m.PrecioAnterior) → <strong>@FormatoPrecio.Dolares(m.PrecioNuevo)</strong></div>
+                }
+                @if (m.RobotNombre != Model.Robot.Nombre)
+                {
+                    <div class="small text-body-secondary">En ese momento se llamaba "@m.RobotNombre".</div>
+                }
+            </div>
+        }
+    </div>
+}
